@@ -1,5 +1,6 @@
 import { PaginationResult } from 'src/base/response/pagination.result';
 import { Result } from 'src/base/response/result';
+import { AccountInfoResponseDto } from 'src/modules/auth/dto/auth-response.dto';
 import { CreateUserAccountDto } from 'src/modules/user-account/dto/create-user-account.dto';
 import { FilterUserAccountDto } from 'src/modules/user-account/dto/filter-user-account.dto';
 import { UpdateUserAccountDto } from 'src/modules/user-account/dto/update-user-account.dto';

@@ -9,8 +9,8 @@ import * as crypto from 'crypto';
 import { JwtServiceConfig } from 'src/configs/config.interface';
 import { IAuthService } from 'src/modules/auth/services/auth.service.interface';
 import {
+  AccountInfoResponseDto,
   AuthResponseDto,
-  SignUpResponseDto,
 } from 'src/modules/auth/dto/auth-response.dto';
 import { TokenPayload } from 'src/modules/auth/interfaces/token.interface';
 import { ERRORS_DICTIONARY } from 'src/shared/constants/error-dictionary.constaint';
@@ -57,14 +57,21 @@ export class AuthService implements IAuthService {
     }
   }
 
-  async signUp(userDto: SignUpDto): Promise<SignUpResponseDto> {
+  async signUp(userDto: SignUpDto): Promise<AccountInfoResponseDto> {
     try {
       const user = await this._userAccountService.create({
         ...userDto,
       });
-      return {
-        id: user.response.id,
-      };
+      return user.response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getInfo(id: number): Promise<AccountInfoResponseDto> {
+    try {
+      const user = await this._userAccountService.get(id);
+      return user.response;
     } catch (error) {
       throw error;
     }

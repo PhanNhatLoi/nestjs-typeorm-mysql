@@ -84,9 +84,9 @@ export class UserAccount {
 
   @Column({
     nullable: true,
-    name: 'RefferalId',
+    name: 'ReferralId',
   })
-  refferalId: number;
+  referralID: number;
 
   @Column({
     default: false,
