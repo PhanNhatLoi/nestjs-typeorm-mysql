@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -9,8 +10,8 @@ import * as crypto from 'crypto';
 import { JwtServiceConfig } from 'src/configs/config.interface';
 import { IAuthService } from 'src/modules/auth/services/auth.service.interface';
 import {
-  AccountInfoResponseDto,
   AuthResponseDto,
+  AccountInfoResponseDto,
 } from 'src/modules/auth/dto/auth-response.dto';
 import { TokenPayload } from 'src/modules/auth/interfaces/token.interface';
 import { ERRORS_DICTIONARY } from 'src/shared/constants/error-dictionary.constaint';
@@ -22,6 +23,10 @@ import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 import { scryptSync } from 'node:crypto';
 import { SignUpDto } from '../dto/sign-up.dto';
 import { IUserAccountService } from 'src/modules/user-account/services/user-account.service.interface';
+import { SendmailService } from 'src/modules/sendmail/sendmail.service';
+import { SignUpTemplate } from 'src/modules/sendmail/template/signUp-html';
+import { IOtpCodeService } from 'src/modules/otp-code/services/otp-code.service.interface';
+import { VerifyEmailDto } from '../dto/verify-email.dto';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -30,6 +35,8 @@ export class AuthService implements IAuthService {
   constructor(
     private readonly _userAccountService: IUserAccountService,
     private readonly _jwtService: JwtService,
+    private readonly sendMailService: SendmailService,
+    private readonly _otpCodeService: IOtpCodeService,
     configService: ConfigService,
   ) {
     this._jwtServiceConfig =
@@ -57,12 +64,80 @@ export class AuthService implements IAuthService {
     }
   }
 
-  async signUp(userDto: SignUpDto): Promise<AccountInfoResponseDto> {
+  async signUp(userDto: SignUpDto): Promise<String> {
     try {
-      const user = await this._userAccountService.create({
-        ...userDto,
+      const userAccount = await this._userAccountService.findParams({
+        email: userDto.email,
       });
-      return user.response;
+
+      if (userAccount.response && userAccount.response.emailVerified) {
+        throw new BadRequestException({
+          message: ERRORS_DICTIONARY.USER_EXISTED,
+          details: 'Email exits!!',
+        });
+      }
+      if (!userAccount.response) {
+        await this._userAccountService.create({
+          ...userDto,
+        });
+      }
+
+      const newCode = Math.floor(100000 + Math.random() * 900000).toString(); //generate code 6 digit
+      const htmlTemplate = SignUpTemplate(newCode);
+      await this.sendMailService.sendmail({
+        sendTo: userDto.email,
+        subject: '<noreply> This is email verify Email register',
+        content: htmlTemplate,
+      });
+      await this._otpCodeService.create({
+        email: userDto.email,
+        code: newCode,
+      });
+      return 'Register success, please check Email';
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async verifyEmailSignUp(verifyEmailDto: VerifyEmailDto): Promise<String> {
+    try {
+      const userAccount = await this._userAccountService.findParams({
+        email: verifyEmailDto.email,
+      });
+
+      if (!userAccount.response) {
+        throw new BadRequestException({
+          message: ERRORS_DICTIONARY.USER_NOT_FOUND,
+          details: 'Email account not found!!',
+        });
+      }
+      const otpCode = await this._otpCodeService.get({
+        user: {
+          email: userAccount.response.email,
+        },
+        code: verifyEmailDto.code,
+      });
+
+      if (!otpCode.response) {
+        throw new BadRequestException({
+          message: ERRORS_DICTIONARY.WRONG_CREDENTIALS,
+          details: 'Otp wrong!!',
+        });
+      }
+
+      if (
+        !otpCode.response.expDate ||
+        new Date(otpCode.response.expDate).getTime() < new Date().getTime()
+      ) {
+        throw new BadRequestException({
+          message: ERRORS_DICTIONARY.VALIDATION_ERROR,
+          details: 'Otp exp!!',
+        });
+      }
+      await this._userAccountService.update(userAccount.response.id, {
+        emailVerified: true,
+      });
+      return 'Activated email success';
     } catch (error) {
       throw error;
     }
@@ -102,13 +177,28 @@ export class AuthService implements IAuthService {
     try {
       const user = await this._userAccountService.findParams({
         email: email,
-        isDeleted: false,
       });
 
-      // if (!user.response.roles.includes(USER_ROLE.PARTNER)) {
-      //   throw new BadRequestException();
-      // }
-      // await this.verifyPassword(password, user.response.password);
+      if (!user.response) {
+        throw new BadRequestException({
+          message: ERRORS_DICTIONARY.USER_NOT_FOUND,
+          details: 'User not found!!',
+        });
+      }
+
+      if (user.response.isDeleted) {
+        throw new BadRequestException({
+          message: ERRORS_DICTIONARY.USER_NOT_FOUND,
+          details: 'User is Deleted!!',
+        });
+      }
+
+      if (!user.response.emailVerified) {
+        throw new BadRequestException({
+          message: ERRORS_DICTIONARY.USER_NOT_FOUND,
+          details: 'Email not activated!!',
+        });
+      }
 
       const hash = crypto.scryptSync(password, 'salt', 32).toString('hex');
       if (hash !== user.response.password) {
@@ -121,25 +211,7 @@ export class AuthService implements IAuthService {
 
       return user.response;
     } catch (error) {
-      throw new BadRequestException({
-        message: ERRORS_DICTIONARY.WRONG_CREDENTIALS,
-        details: 'Wrong credentials!!!',
-      });
-    }
-  }
-
-  private async verifyPassword(passwordCompare: string, password: string) {
-    const passwordHash = crypto
-      .createHash('md5')
-      .update(passwordCompare, 'utf8')
-      .digest('hex')
-      .toUpperCase();
-
-    if (passwordHash !== password) {
-      throw new BadRequestException({
-        message: ERRORS_DICTIONARY.CONTENT_NOT_MATCH,
-        details: 'Content not match!!',
-      });
+      throw error;
     }
   }
 

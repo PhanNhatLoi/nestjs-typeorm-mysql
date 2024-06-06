@@ -1,16 +1,19 @@
-import { Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RequestWithUser } from 'src/base/types/requests.type';
 import { IAuthService } from 'src/modules/auth/services/auth.service.interface';
 import { SignInDto } from 'src/modules/auth/dto/sign-in.dto';
 import { JwtRefreshTokenGuard } from 'src/modules/auth/guards/jwt-refresh-token.guard';
 import { LocalAuthGuard } from 'src/modules/auth/guards/local.guard';
+import { SignUpDto } from './dto/sign-up.dto';
 import { JwtAccessTokenGuard } from './guards/jwt-access-token.guard';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
   constructor(private readonly _authService: IAuthService) {}
+
   // ==========
   // Sign In
   // ==========
@@ -58,6 +61,87 @@ export class AuthController {
     const { user } = request;
     return await this._authService.signIn(user.id);
   }
+  // ==========
+  // Sign In
+  // ==========
+
+  // ==========
+  // Sign Up
+  // ==========
+  @Post('sign-up')
+  @ApiBody({
+    type: SignUpDto,
+    examples: {
+      user: {
+        value: {
+          email: 'useraccount@myzens.net',
+          password: '12345678',
+          phoneNumber: '+84361111111',
+        } as SignUpDto,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'User exits',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 400,
+          message: 'ATH_0091',
+          details: 'User exits!!!',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'success',
+    content: {
+      'application/json': {
+        example: {
+          id: 1,
+          createdDate: '2024-06-04T02:16:42.000Z',
+          email: 'useraccount@myzens.net',
+          address: '',
+          job: '',
+          roleId: '',
+          imageUrl: '',
+          phoneNumber: '+84361111111',
+          referralID: '',
+          emailVerified: false,
+        },
+      },
+    },
+  })
+  async signUp(@Body() signUp: SignUpDto) {
+    return await this._authService.signUp(signUp);
+  }
+  // ==========
+  // Sign Up
+  // ==========
+
+  // ==========
+  // verify email
+  // ==========
+  @Post('verify')
+  @ApiBody({
+    type: VerifyEmailDto,
+    examples: {
+      user: {
+        value: {
+          email: 'useraccount@myzens.net',
+          code: '111111',
+        } as VerifyEmailDto,
+      },
+    },
+  })
+  async verifyEmail(@Body() payload: VerifyEmailDto) {
+    return await this._authService.verifyEmailSignUp(payload);
+  }
+  // ==========
+  // verify email
+  // ==========
 
   // ==========
   // Get info

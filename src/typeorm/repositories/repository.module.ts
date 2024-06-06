@@ -3,6 +3,8 @@ import { ConfigModuleOptions } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 import { UserAccountRepository } from 'src/typeorm/repositories/user-account.repository';
+import { OtpCode } from '../entities/otp-code.entity';
+import { OtpCodeRepository } from './otp-code.repository';
 
 @Module({
   providers: [],
@@ -16,11 +18,16 @@ export class RepositoryModule {
         provide: 'IUserAccountRepository',
         useClass: UserAccountRepository,
         scope: Scope.REQUEST,
-      }
+      },
+      {
+        provide: 'IOtpCodeRepository',
+        useClass: OtpCodeRepository,
+        scope: Scope.REQUEST,
+      },
     ];
 
     const imports = [
-      TypeOrmModule.forFeature([UserAccount], 'identity'),
+      TypeOrmModule.forFeature([UserAccount, OtpCode], 'identity'),
     ];
 
     const exports = Object.assign([], providers);

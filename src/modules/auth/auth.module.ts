@@ -12,12 +12,17 @@ import { UserAccountService } from 'src/modules/user-account/services/user-accou
 import { IUserAccountService } from 'src/modules/user-account/services/user-account.service.interface';
 import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 import { UserAccountRepository } from 'src/typeorm/repositories/user-account.repository';
+import { SendmailService } from '../sendmail/sendmail.service';
+import { IOtpCodeService } from '../otp-code/services/otp-code.service.interface';
+import { OtpCodeService } from '../otp-code/services/otp-code-account.service';
+import { OtpCode } from 'src/typeorm/entities/otp-code.entity';
+import { OtpCodeRepository } from 'src/typeorm/repositories/otp-code.repository';
 
 @Module({
   imports: [
     PassportModule,
     JwtModule.register({}),
-    TypeOrmModule.forFeature([UserAccount], 'identity'),
+    TypeOrmModule.forFeature([UserAccount, OtpCode], 'identity'),
   ],
   controllers: [AuthController],
   providers: [
@@ -30,12 +35,21 @@ import { UserAccountRepository } from 'src/typeorm/repositories/user-account.rep
       useClass: UserAccountService,
     },
     {
+      provide: IOtpCodeService,
+      useClass: OtpCodeService,
+    },
+    {
+      provide: 'IOtpCodeRepository',
+      useClass: OtpCodeRepository,
+    },
+    {
       provide: 'IUserAccountRepository',
       useClass: UserAccountRepository,
     },
     LocalStrategy,
     JwtAccessTokenStrategy,
     JwtRefreshTokenStrategy,
+    SendmailService,
   ],
 })
 export class AuthModule {}

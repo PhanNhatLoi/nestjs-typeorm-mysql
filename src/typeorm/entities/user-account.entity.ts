@@ -35,18 +35,20 @@ export class UserAccount {
 
   @Column({
     nullable: true,
+    default: '',
     name: 'Address',
   })
   address: string;
 
   @Column({
     nullable: true,
+    default: '',
     name: 'Job',
   })
   job: string;
 
   @Column({
-    default: true,
+    default: false,
     name: 'IsSuperAdmin',
   })
   isSuperAdmin: boolean;
@@ -73,6 +75,7 @@ export class UserAccount {
 
   @Column({
     nullable: true,
+    default: '',
     name: 'ImageUrl',
   })
   imageUrl: string;
@@ -84,11 +87,12 @@ export class UserAccount {
 
   @Column({
     nullable: true,
-    name: 'ReferralId',
+    name: 'ReferralID',
   })
   referralID: number;
 
   @Column({
+    nullable: true,
     default: false,
     name: 'EmailVerified',
   })

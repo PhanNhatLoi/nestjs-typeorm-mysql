@@ -51,24 +51,4 @@ export class IdentityService implements IIdentityService {
   get emailVerified(): boolean {
     return this._user?.emailVerified;
   }
-
-  get subAccountStr(): string {
-    return this._user?.subAccountStr;
-  }
-
-  get isGoogleAuthenticationEnable(): boolean {
-    return this._user?.isGoogleAuthenticationEnable;
-  }
-
-  get googleAuthenticationSecretKey(): string {
-    return this._user?.googleAuthenticationSecretKey;
-  }
-
-  get googleAuthenticationManualEntryKey(): string {
-    return this._user?.googleAuthenticationManualEntryKey;
-  }
-
-  get googleAuthenticationUrl(): string {
-    return this._user?.googleAuthenticationUrl;
-  }
 }

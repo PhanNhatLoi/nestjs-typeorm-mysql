@@ -7,6 +7,7 @@ import { DbContextModule } from 'src/typeorm/db-context.module';
 import { RepositoryModule } from 'src/typeorm/repositories/repository.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { SendmailModule } from './modules/sendmail/sendmail.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AppService } from './app.service';
     RepositoryModule.forRoot({ isGlobal: true }),
     DbContextModule,
     AuthModule,
+    SendmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
