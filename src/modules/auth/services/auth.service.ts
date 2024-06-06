@@ -165,7 +165,7 @@ export class AuthService implements IAuthService {
       this._jwtService.sign(payload, {
         algorithm: 'RS256',
         privateKey: access_token_private_key,
-        expiresIn: `${this._jwtServiceConfig.accessTokenExpirationTime}s`,
+        expiresIn: `${this._jwtServiceConfig.accessTokenExpirationTime}`,
       }),
     );
   }
@@ -175,7 +175,7 @@ export class AuthService implements IAuthService {
       this._jwtService.sign(payload, {
         algorithm: 'RS256',
         privateKey: refresh_token_private_key,
-        expiresIn: `${this._jwtServiceConfig.refreshTokenExpirationTime}s`,
+        expiresIn: `${this._jwtServiceConfig.refreshTokenExpirationTime}`,
       }),
     );
   }
