@@ -12,6 +12,7 @@ import { IUserAccountRepository } from 'src/typeorm/repositories/abstractions/us
 import { Like } from 'typeorm';
 import { scryptSync } from 'node:crypto';
 import { ERRORS_DICTIONARY } from 'src/shared/constants/error-dictionary.constaint';
+import { AccountInfoResponseDto } from 'src/modules/auth/dto/auth-response.dto';
 
 @Injectable()
 export class UserAccountService implements IUserAccountService {
