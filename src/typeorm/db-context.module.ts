@@ -18,7 +18,7 @@ import { UserAccount } from 'src/typeorm/entities/user-account.entity';
           configService.getOrThrow<DatabaseConfig>('database')[0].password,
         database:
           configService.getOrThrow<DatabaseConfig>('database')[0].tableName,
-        entities: [UserAccount],
+        entities: [`${__dirname}/../**/*.entity.{ts,js}`],
         synchronize: true,
       }),
       inject: [ConfigService],

@@ -5,6 +5,7 @@ import {
 import { TokenPayload } from 'src/modules/auth/interfaces/token.interface';
 import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 import { SignUpDto } from '../dto/sign-up.dto';
+import { VerifyEmailDto } from '../dto/verify-email.dto';
 
 export abstract class IAuthService {
   abstract getAuthenticatedUser(
@@ -13,7 +14,8 @@ export abstract class IAuthService {
   ): Promise<UserAccount>;
   abstract getInfo(id: number): Promise<AccountInfoResponseDto>;
   abstract signIn(id: number): Promise<AuthResponseDto>;
-  abstract signUp(user: SignUpDto): Promise<AccountInfoResponseDto>;
+  abstract verifyEmailSignUp(payload: VerifyEmailDto): Promise<String>;
+  abstract signUp(user: SignUpDto): Promise<String>;
   abstract getUserIfRefreshTokenMatched(
     id: number,
     refreshToken: string,

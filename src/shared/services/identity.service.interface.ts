@@ -9,9 +9,4 @@ export abstract class IIdentityService {
   abstract phoneNumber: string;
   abstract refferalId: string | null;
   abstract emailVerified: boolean;
-  abstract subAccountStr: string | null;
-  abstract isGoogleAuthenticationEnable: boolean;
-  abstract googleAuthenticationSecretKey: string | null;
-  abstract googleAuthenticationManualEntryKey: string | null;
-  abstract googleAuthenticationUrl: string | null;
 }

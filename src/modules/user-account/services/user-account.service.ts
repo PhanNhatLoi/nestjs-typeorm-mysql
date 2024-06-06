@@ -27,7 +27,9 @@ export class UserAccountService implements IUserAccountService {
     return Results.success(result);
   }
 
-  async create(payload: CreateUserAccountDto): Promise<Result<UserAccount>> {
+  async create(
+    payload: CreateUserAccountDto,
+  ): Promise<Result<AccountInfoResponseDto>> {
     const checkUnique = await this._userAccountRepository.findOneByConditions({
       where: {
         email: payload.email,
@@ -51,8 +53,15 @@ export class UserAccountService implements IUserAccountService {
       modifiedDate: new Date(),
     };
     const userAccount = await this._userAccountRepository.save(newAccount);
+    if (userAccount) {
+      delete userAccount.password;
+      delete userAccount.refreshToken;
+      delete userAccount.isDeleted;
+      delete userAccount.isSuperAdmin;
+    }
     return Results.success(userAccount);
   }
+
   async getPagination(
     filter: FilterUserAccountDto,
   ): Promise<Result<PaginationResult<UserAccount>>> {
@@ -70,11 +79,13 @@ export class UserAccountService implements IUserAccountService {
     );
     return Results.success(result);
   }
-  async get(id: number): Promise<Result<UserAccount>> {
+  async get(id: number): Promise<Result<AccountInfoResponseDto>> {
     const result = await this._userAccountRepository.findOneById(id);
     if (result) {
       delete result.password;
       delete result.refreshToken;
+      delete result.isDeleted;
+      delete result.isSuperAdmin;
     }
     return Results.success(result);
   }
@@ -85,6 +96,8 @@ export class UserAccountService implements IUserAccountService {
     if (result) {
       // delete result.password;
       delete result.refreshToken;
+    } else {
+      return Results.badRequest('User not found');
     }
     return Results.success(result);
   }
