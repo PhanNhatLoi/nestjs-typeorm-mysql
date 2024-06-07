@@ -48,16 +48,17 @@ export class UserAccountService implements IUserAccountService {
     ).toString('hex');
     const newAccount = {
       ...payload,
+
       password: passwordHash,
       createdDate: new Date(),
       modifiedDate: new Date(),
+      createdBy: 0,
+      modifiedBy: 0,
     };
     const userAccount = await this._userAccountRepository.save(newAccount);
     if (userAccount) {
       delete userAccount.password;
-      delete userAccount.refreshToken;
       delete userAccount.isDeleted;
-      delete userAccount.isSuperAdmin;
     }
     return Results.success(userAccount);
   }
@@ -83,9 +84,7 @@ export class UserAccountService implements IUserAccountService {
     const result = await this._userAccountRepository.findOneById(id);
     if (result) {
       delete result.password;
-      delete result.refreshToken;
       delete result.isDeleted;
-      delete result.isSuperAdmin;
     }
     return Results.success(result);
   }
@@ -95,7 +94,6 @@ export class UserAccountService implements IUserAccountService {
     });
     if (result) {
       // delete result.password;
-      delete result.refreshToken;
     } else {
       return Results.badRequest('User not found');
     }

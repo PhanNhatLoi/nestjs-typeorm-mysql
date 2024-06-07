@@ -7,10 +7,11 @@ import { join } from 'path';
 import * as basicAuth from 'express-basic-auth';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import {
-  API_PREFIX,
+  SWAGGER_PREFIX,
   ENVIRONMENT,
   SWAGGER_DES,
   SWAGGER_TITLE,
+  API_PREFIX,
 } from 'src/shared/constants/global.constants';
 import { SwaggerConfig } from 'src/configs/config.interface';
 import { ValidationPipeOptions } from 'src/base/pipes/validation.pipe';
@@ -19,6 +20,7 @@ async function bootstrap() {
   const projectRoot = process.cwd();
   const logger = new Logger(bootstrap.name);
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.setGlobalPrefix(API_PREFIX);
   app.enableCors({
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -55,7 +57,7 @@ async function bootstrap() {
       swaggerConfig.docOptions.options,
     );
     SwaggerModule.setup(
-      swaggerConfig.path || API_PREFIX,
+      swaggerConfig.path || SWAGGER_PREFIX,
       app,
       document,
       swaggerConfig.options,

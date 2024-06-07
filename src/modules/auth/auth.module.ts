@@ -3,7 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { IAuthService } from 'src/modules/auth/services/auth.service.interface';
-import { AuthController } from 'src/modules/auth/auth.controller';
+import { AdminController } from 'src/modules/auth/admin.controller';
 import { AuthService } from 'src/modules/auth/services/auth.service';
 import { JwtAccessTokenStrategy } from 'src/modules/auth/strategies/jwt-access-token.strategy';
 import { JwtRefreshTokenStrategy } from 'src/modules/auth/strategies/jwt-refresh-token.strategy';
@@ -13,18 +13,19 @@ import { IUserAccountService } from 'src/modules/user-account/services/user-acco
 import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 import { UserAccountRepository } from 'src/typeorm/repositories/user-account.repository';
 import { SendmailService } from '../sendmail/sendmail.service';
-import { IOtpCodeService } from '../otp-code/services/otp-code.service.interface';
-import { OtpCodeService } from '../otp-code/services/otp-code-account.service';
-import { OtpCode } from 'src/typeorm/entities/otp-code.entity';
-import { OtpCodeRepository } from 'src/typeorm/repositories/otp-code.repository';
+import { IUserVerifyService } from '../user-verify/services/user-verify.service.interface';
+import { UserVerifyService } from '../user-verify/services/user-verify.service';
+import { UserVerify } from 'src/typeorm/entities/user-verify.entity';
+import { UserVerifyRepository } from 'src/typeorm/repositories/user-verify.repository';
+import { AuthController } from './auth.controller';
 
 @Module({
   imports: [
     PassportModule,
     JwtModule.register({}),
-    TypeOrmModule.forFeature([UserAccount, OtpCode], 'identity'),
+    TypeOrmModule.forFeature([UserAccount, UserVerify], 'identity'),
   ],
-  controllers: [AuthController],
+  controllers: [AdminController, AuthController],
   providers: [
     {
       provide: IAuthService,
@@ -35,12 +36,12 @@ import { OtpCodeRepository } from 'src/typeorm/repositories/otp-code.repository'
       useClass: UserAccountService,
     },
     {
-      provide: IOtpCodeService,
-      useClass: OtpCodeService,
+      provide: IUserVerifyService,
+      useClass: UserVerifyService,
     },
     {
-      provide: 'IOtpCodeRepository',
-      useClass: OtpCodeRepository,
+      provide: 'IUserVerifyRepository',
+      useClass: UserVerifyRepository,
     },
     {
       provide: 'IUserAccountRepository',

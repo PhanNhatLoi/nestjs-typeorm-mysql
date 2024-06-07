@@ -1,4 +1,5 @@
 import { IsEmail, IsNotEmpty, IsPhoneNumber, MaxLength } from 'class-validator';
+import { USER_ROLE } from 'src/shared/constants/global.constants';
 import { Column } from 'typeorm';
 export class SignUpDto {
   @Column({
@@ -11,8 +12,11 @@ export class SignUpDto {
 
   @IsNotEmpty()
   @IsPhoneNumber()
-  phoneNumber: string;
+  phone: string;
 
   @IsNotEmpty()
   password: string;
+
+  @IsNotEmpty()
+  role: USER_ROLE;
 }

@@ -5,14 +5,4 @@ export class AuthResponseDto {
   refreshToken: string;
 }
 
-export class AccountInfoResponseDto extends UserAccount {
-  id: number;
-  email: string;
-  phoneNumber: string;
-  createdDate: Date;
-  address: string;
-  job: string;
-  imageUrl: string;
-  referralID: number;
-  emailVerified: boolean;
-}
+export class AccountInfoResponseDto extends UserAccount {}

@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -25,8 +24,9 @@ import { SignUpDto } from '../dto/sign-up.dto';
 import { IUserAccountService } from 'src/modules/user-account/services/user-account.service.interface';
 import { SendmailService } from 'src/modules/sendmail/sendmail.service';
 import { SignUpTemplate } from 'src/modules/sendmail/template/signUp-html';
-import { IOtpCodeService } from 'src/modules/otp-code/services/otp-code.service.interface';
+import { IUserVerifyService } from 'src/modules/user-verify/services/user-verify.service.interface';
 import { VerifyEmailDto } from '../dto/verify-email.dto';
+import { USER_ROLE } from 'src/shared/constants/global.constants';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -36,7 +36,7 @@ export class AuthService implements IAuthService {
     private readonly _userAccountService: IUserAccountService,
     private readonly _jwtService: JwtService,
     private readonly sendMailService: SendmailService,
-    private readonly _otpCodeService: IOtpCodeService,
+    private readonly _userVerifyService: IUserVerifyService,
     configService: ConfigService,
   ) {
     this._jwtServiceConfig =
@@ -66,19 +66,33 @@ export class AuthService implements IAuthService {
 
   async signUp(userDto: SignUpDto): Promise<String> {
     try {
-      const userAccount = await this._userAccountService.findParams({
-        email: userDto.email,
-      });
+      const userAccount = await this._userAccountService.findParams([
+        {
+          email: userDto.email,
+        },
+      ]);
 
-      if (userAccount.response && userAccount.response.emailVerified) {
+      if (userAccount.response) {
         throw new BadRequestException({
           message: ERRORS_DICTIONARY.USER_EXISTED,
           details: 'Email exits!!',
         });
       }
+      const acceptRoles = Object.keys(USER_ROLE).filter(
+        (f) => f !== USER_ROLE.SUPPER_ADMIN,
+      );
+      if (!acceptRoles.includes(userDto.role)) {
+        throw new BadRequestException({
+          message: ERRORS_DICTIONARY.VALIDATION_ERROR,
+          details: 'Role invalid!!',
+        });
+      }
       if (!userAccount.response) {
         await this._userAccountService.create({
           ...userDto,
+          role: userDto.role,
+          socialLinks: [],
+          achievements: [],
         });
       }
 
@@ -89,9 +103,9 @@ export class AuthService implements IAuthService {
         subject: '<noreply> This is email verify Email register',
         content: htmlTemplate,
       });
-      await this._otpCodeService.create({
+      await this._userVerifyService.create({
         email: userDto.email,
-        code: newCode,
+        otp: newCode,
       });
       return 'Register success, please check Email';
     } catch (error) {
@@ -111,11 +125,11 @@ export class AuthService implements IAuthService {
           details: 'Email account not found!!',
         });
       }
-      const otpCode = await this._otpCodeService.get({
+      const otpCode = await this._userVerifyService.get({
         user: {
           email: userAccount.response.email,
         },
-        code: verifyEmailDto.code,
+        code: verifyEmailDto.otp,
       });
 
       if (!otpCode.response) {
@@ -126,8 +140,8 @@ export class AuthService implements IAuthService {
       }
 
       if (
-        !otpCode.response.expDate ||
-        new Date(otpCode.response.expDate).getTime() < new Date().getTime()
+        !otpCode.response.expiresDate ||
+        new Date(otpCode.response.expiresDate).getTime() < new Date().getTime()
       ) {
         throw new BadRequestException({
           message: ERRORS_DICTIONARY.VALIDATION_ERROR,
@@ -212,21 +226,6 @@ export class AuthService implements IAuthService {
       return user.response;
     } catch (error) {
       throw error;
-    }
-  }
-
-  private async verifyPlainContentWithHashedContent(
-    plainText: string,
-    hashedText: string,
-  ) {
-    const isMatching =
-      (await scryptSync(plainText, 'salt', 64).toString('hex')) === hashedText;
-
-    if (!isMatching) {
-      throw new BadRequestException({
-        message: ERRORS_DICTIONARY.CONTENT_NOT_MATCH,
-        details: 'Content not match!!',
-      });
     }
   }
 

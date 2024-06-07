@@ -40,8 +40,8 @@ export class IdentityService implements IIdentityService {
     return this._user?.isExternal;
   }
 
-  get phoneNumber(): string {
-    return this._user?.phoneNumber;
+  get phone(): string {
+    return this._user?.phone;
   }
 
   get refferalId(): string {
