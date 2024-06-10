@@ -6,7 +6,7 @@ export abstract class IIdentityService {
   abstract roleId: string;
   abstract imageUrl: string | null;
   abstract isExternal: boolean;
-  abstract phoneNumber: string;
+  abstract phone: string;
   abstract refferalId: string | null;
   abstract emailVerified: boolean;
 }

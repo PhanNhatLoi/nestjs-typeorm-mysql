@@ -7,5 +7,5 @@ export class VerifyEmailDto {
 
   @IsNotEmpty()
   @MaxLength(6)
-  code: string;
+  otp: string;
 }

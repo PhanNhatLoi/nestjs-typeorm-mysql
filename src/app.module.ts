@@ -8,6 +8,7 @@ import { RepositoryModule } from 'src/typeorm/repositories/repository.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SendmailModule } from './modules/sendmail/sendmail.module';
+import { GenerateDbModule } from './modules/generate-db/generate-db.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { SendmailModule } from './modules/sendmail/sendmail.module';
     DbContextModule,
     AuthModule,
     SendmailModule,
+    GenerateDbModule,
   ],
   controllers: [AppController],
   providers: [AppService],

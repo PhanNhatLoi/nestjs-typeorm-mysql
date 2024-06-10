@@ -7,8 +7,8 @@ import {
 } from 'typeorm';
 import { UserAccount } from './user-account.entity';
 
-@Entity({ name: 'otp' })
-export class OtpCode {
+@Entity({ name: 'user-verify' })
+export class UserVerify {
   @PrimaryGeneratedColumn()
   @PrimaryColumn({
     name: 'Id',
@@ -24,15 +24,17 @@ export class OtpCode {
   @Column({
     nullable: true,
     type: 'datetime',
-    name: 'ExpDate',
+    name: 'ExpiresDate',
   })
-  expDate: Date;
+  expiresDate: Date;
 
   @Column({
+    type: 'varchar',
+    length: 6,
     default: '',
-    name: 'code',
+    name: 'otp',
   })
-  code: string;
+  otp: string;
 
   @ManyToOne(() => UserAccount, (user) => user.id)
   user: UserAccount;

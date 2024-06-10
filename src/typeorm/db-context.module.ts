@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseConfig } from 'src/configs/config.interface';
-import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 
 @Module({
   imports: [

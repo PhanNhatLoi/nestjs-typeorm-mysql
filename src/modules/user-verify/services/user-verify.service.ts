@@ -1,28 +1,28 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Result } from 'src/base/response/result';
 import { Results } from 'src/base/response/result-builder';
-import { IOtpCodeService } from './otp-code.service.interface';
-import { IOtpCodeRepository } from 'src/typeorm/repositories/abstractions/otp-code.repository.interface';
+import { IUserVerifyService } from './user-verify.service.interface';
+import { IUserVerifyRepository } from 'src/typeorm/repositories/abstractions/user-verify.repository.interface';
 import { CreateOtpCodeDto } from '../dto/create-otp.dto';
-import { OtpCode } from 'src/typeorm/entities/otp-code.entity';
+import { UserVerify } from 'src/typeorm/entities/user-verify.entity';
 import { IUserAccountService } from 'src/modules/user-account/services/user-account.service.interface';
 import { FilterOtpCodeDto } from '../dto/filter-otp.dto';
 
 @Injectable()
-export class OtpCodeService implements IOtpCodeService {
+export class UserVerifyService implements IUserVerifyService {
   constructor(
-    @Inject('IOtpCodeRepository')
-    private readonly _otpCodeRepository: IOtpCodeRepository,
+    @Inject('IUserVerifyRepository')
+    private readonly _userVerifyRepository: IUserVerifyRepository,
     private readonly _userAccountService: IUserAccountService,
   ) {}
 
-  async create(payload: CreateOtpCodeDto): Promise<Result<OtpCode>> {
+  async create(payload: CreateOtpCodeDto): Promise<Result<UserVerify>> {
     const user = await this._userAccountService.findParams({
       email: payload.email,
     });
     if (!user.response) throw new Error('User not found');
 
-    let otpCode = await this._otpCodeRepository.findOneByConditions({
+    let otpCode = await this._userVerifyRepository.findOneByConditions({
       where: {
         user: {
           id: user.response.id,
@@ -32,25 +32,25 @@ export class OtpCodeService implements IOtpCodeService {
     const dateNow = new Date();
     if (otpCode) {
       // Update the existing OTP code
-      otpCode.code = payload.code;
+      otpCode.otp = payload.otp;
       otpCode.user = user.response;
       otpCode.createdDate = dateNow;
-      otpCode.expDate = new Date(dateNow.getTime() + 3 * 60000);
+      otpCode.expiresDate = new Date(dateNow.getTime() + 3 * 60000);
     } else {
       // Create a new OTP code
-      otpCode = this._otpCodeRepository.create({
-        code: payload.code,
+      otpCode = this._userVerifyRepository.create({
+        otp: payload.otp,
         user: user.response,
         createdDate: dateNow,
-        expDate: new Date(dateNow.getTime() + 3 * 60000),
+        expiresDate: new Date(dateNow.getTime() + 3 * 60000),
       });
     }
 
-    return Results.success(await this._otpCodeRepository.save(otpCode));
+    return Results.success(await this._userVerifyRepository.save(otpCode));
   }
 
-  async get(payload: FilterOtpCodeDto): Promise<Result<OtpCode>> {
-    const result = await this._otpCodeRepository.findOneByConditions({
+  async get(payload: FilterOtpCodeDto): Promise<Result<UserVerify>> {
+    const result = await this._userVerifyRepository.findOneByConditions({
       where: payload,
     });
 

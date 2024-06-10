@@ -1,5 +1,5 @@
 import {
-  API_PREFIX,
+  SWAGGER_PREFIX,
   SWAGGER_DES,
   SWAGGER_TITLE,
 } from 'src/shared/constants/global.constants';
@@ -43,7 +43,7 @@ export const GLOBAL_CONFIG = () => ({
     title: SWAGGER_TITLE,
     description: SWAGGER_DES,
     version: '1.5',
-    path: API_PREFIX,
+    path: SWAGGER_PREFIX,
     auth: {
       authOptions: {
         type: 'http',

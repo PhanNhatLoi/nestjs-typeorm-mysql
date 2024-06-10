@@ -1,34 +1,31 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RequestWithUser } from 'src/base/types/requests.type';
 import { IAuthService } from 'src/modules/auth/services/auth.service.interface';
 import { SignInDto } from 'src/modules/auth/dto/sign-in.dto';
 import { JwtRefreshTokenGuard } from 'src/modules/auth/guards/jwt-refresh-token.guard';
 import { LocalAuthGuard } from 'src/modules/auth/guards/local.guard';
-import { SignUpDto } from './dto/sign-up.dto';
-import { JwtAccessTokenGuard } from './guards/jwt-access-token.guard';
-import { VerifyEmailDto } from './dto/verify-email.dto';
-import { USER_ROLE } from 'src/shared/constants/global.constants';
 import { RolesGuard } from './guards/roles.guard';
+import { USER_ROLE } from 'src/shared/constants/global.constants';
 import { Roles } from 'src/base/decorators/roles.decorator';
 
-@Controller('auth')
-@ApiTags('auth')
-export class AuthController {
+@Controller('admin')
+@ApiTags('admin')
+export class AdminController {
   constructor(private readonly _authService: IAuthService) {}
 
   // ==========
   // Sign In
   // ==========
   @UseGuards(LocalAuthGuard, RolesGuard)
-  @Roles(USER_ROLE.ENTERPRISE, USER_ROLE.USER)
+  @Roles(USER_ROLE.SUPPER_ADMIN)
   @Post('sign-in')
   @ApiBody({
     type: SignInDto,
     examples: {
       user: {
         value: {
-          email: 'exampleuser@myzens.net',
+          email: 'admin@myzens.net',
           password: '12345678',
         } as SignInDto,
       },
@@ -67,120 +64,6 @@ export class AuthController {
   }
   // ==========
   // Sign In
-  // ==========
-
-  // ==========
-  // Sign Up
-  // ==========
-  @Post('sign-up')
-  @ApiBody({
-    type: SignUpDto,
-    examples: {
-      user: {
-        value: {
-          email: 'exampleuser@myzens.net',
-          password: '12345678',
-          phone: '+84 361111111',
-          role: USER_ROLE.USER,
-        } as SignUpDto,
-      },
-    },
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'User exits',
-    content: {
-      'application/json': {
-        example: {
-          statusCode: 400,
-          message: 'ATH_0091',
-          details: 'User exits!!!',
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'success',
-    content: {
-      'application/json': {
-        example: {},
-      },
-    },
-  })
-  async signUp(@Body() signUp: SignUpDto) {
-    return await this._authService.signUp(signUp);
-  }
-  // ==========
-  // Sign Up
-  // ==========
-
-  // ==========
-  // verify email
-  // ==========
-  @Post('verify')
-  @ApiBody({
-    type: VerifyEmailDto,
-    examples: {
-      user: {
-        value: {
-          email: 'useraccount@myzens.net',
-          otp: '111111',
-        } as VerifyEmailDto,
-      },
-    },
-  })
-  async verifyEmail(@Body() payload: VerifyEmailDto) {
-    return await this._authService.verifyEmailSignUp(payload);
-  }
-  // ==========
-  // verify email
-  // ==========
-
-  // ==========
-  // Get info
-  // ==========
-  @UseGuards(JwtAccessTokenGuard)
-  @Post('get-info')
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized',
-    content: {
-      'application/json': {
-        example: {
-          statusCode: 400,
-          message: 'Wrong credentials!!',
-          error: 'Bad Request',
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'success',
-    content: {
-      'application/json': {
-        example: {
-          id: 1,
-          createdDate: '2024-06-04T02:16:42.000Z',
-          email: 'useraccount@myzens.net',
-          address: '',
-          job: '',
-          roleId: '',
-          imageUrl: '',
-          phone: '+84361111111',
-          referralID: '',
-          emailVerified: false,
-        },
-      },
-    },
-  })
-  async getInfo(@Req() request: RequestWithUser) {
-    const { user } = request;
-    return await this._authService.getInfo(user.id);
-  }
-  // ==========
-  // Get info
   // ==========
 
   // ==========

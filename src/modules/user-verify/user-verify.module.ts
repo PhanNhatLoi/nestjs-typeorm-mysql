@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { UserAccountService } from 'src/modules/user-account/services/user-account.service';
 import { IUserAccountService } from 'src/modules/user-account/services/user-account.service.interface';
-import { IOtpCodeService } from './services/otp-code.service.interface';
-import { OtpCodeService } from './services/otp-code-account.service';
+import { IUserVerifyService } from './services/user-verify.service.interface';
+import { UserVerifyService } from './services/user-verify.service';
 
 @Module({
   imports: [],
@@ -13,8 +13,8 @@ import { OtpCodeService } from './services/otp-code-account.service';
       useClass: UserAccountService,
     },
     {
-      provide: IOtpCodeService,
-      useClass: OtpCodeService,
+      provide: IUserVerifyService,
+      useClass: UserVerifyService,
     },
   ],
 })
