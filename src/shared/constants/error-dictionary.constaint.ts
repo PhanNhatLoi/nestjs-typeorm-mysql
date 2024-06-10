@@ -17,4 +17,6 @@ export enum ERRORS_DICTIONARY {
   //
   NOT_FOUND = 'NF_0001',
   ALREADY_EXISTS = 'AE_0001',
+
+  TIME_LIMIT = 'TL_001',
 }

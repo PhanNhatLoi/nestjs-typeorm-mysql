@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { TokenPayload } from '../interfaces/token.interface';
 import { access_token_public_key } from 'src/shared/constants/jwt.constaint';
 import { IUserAccountService } from 'src/modules/user-account/services/user-account.service.interface';
+import { ERRORS_DICTIONARY } from 'src/shared/constants/error-dictionary.constaint';
 
 @Injectable()
 export class JwtAccessTokenStrategy extends PassportStrategy(Strategy) {
@@ -16,6 +17,10 @@ export class JwtAccessTokenStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: TokenPayload) {
-    return await this._userService.get(payload.id);
+    const user = await this._userService.get(payload.id);
+    if (!user.response.isLoggedIn) {
+      throw new UnauthorizedException();
+    }
+    return user.response;
   }
 }

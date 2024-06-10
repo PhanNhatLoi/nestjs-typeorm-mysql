@@ -13,4 +13,8 @@ export class CreateUserAccountDto {
     value: number;
   }[];
   role: USER_ROLE;
+  location?: {
+    lat: number;
+    lng: number;
+  };
 }

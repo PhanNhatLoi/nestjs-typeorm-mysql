@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { Result } from 'src/base/response/result';
 import { Results } from 'src/base/response/result-builder';
 import { IUserVerifyService } from './user-verify.service.interface';
@@ -7,6 +7,7 @@ import { CreateOtpCodeDto } from '../dto/create-otp.dto';
 import { UserVerify } from 'src/typeorm/entities/user-verify.entity';
 import { IUserAccountService } from 'src/modules/user-account/services/user-account.service.interface';
 import { FilterOtpCodeDto } from '../dto/filter-otp.dto';
+import { ERRORS_DICTIONARY } from 'src/shared/constants/error-dictionary.constaint';
 
 @Injectable()
 export class UserVerifyService implements IUserVerifyService {
@@ -31,6 +32,12 @@ export class UserVerifyService implements IUserVerifyService {
     });
     const dateNow = new Date();
     if (otpCode) {
+      if (new Date(otpCode.expiresDate).getTime() > new Date().getTime()) {
+        throw new BadRequestException({
+          message: ERRORS_DICTIONARY.TIME_LIMIT,
+          details: 'Limit send otp time, please try later!!',
+        });
+      }
       // Update the existing OTP code
       otpCode.otp = payload.otp;
       otpCode.user = user.response;

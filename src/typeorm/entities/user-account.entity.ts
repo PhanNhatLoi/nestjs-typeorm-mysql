@@ -188,4 +188,11 @@ export class UserAccount {
     lat: number;
     lng: number;
   };
+
+  @Column({
+    name: 'IsLoggedIn',
+    nullable: true,
+    default: false,
+  })
+  isLoggedIn: boolean;
 }
