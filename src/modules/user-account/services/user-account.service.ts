@@ -13,6 +13,9 @@ import { Like } from 'typeorm';
 import { scryptSync } from 'node:crypto';
 import { ERRORS_DICTIONARY } from 'src/shared/constants/error-dictionary.constaint';
 import { AccountInfoResponseDto } from 'src/modules/auth/dto/auth-response.dto';
+import * as bcrypt from 'bcrypt';
+
+export const saltOrRounds = 10;
 
 @Injectable()
 export class UserAccountService implements IUserAccountService {
@@ -41,11 +44,9 @@ export class UserAccountService implements IUserAccountService {
         details: 'User exits!!!',
       });
     }
-    const passwordHash = await scryptSync(
-      payload.password,
-      'salt',
-      32,
-    ).toString('hex');
+
+    const passwordHash = await bcrypt.hash(payload.password, saltOrRounds);
+
     const newAccount = {
       ...payload,
 

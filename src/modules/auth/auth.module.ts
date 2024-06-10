@@ -47,6 +47,7 @@ import { AuthController } from './auth.controller';
       provide: 'IUserAccountRepository',
       useClass: UserAccountRepository,
     },
+
     LocalStrategy,
     JwtAccessTokenStrategy,
     JwtRefreshTokenStrategy,

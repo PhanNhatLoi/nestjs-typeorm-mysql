@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RequestWithUser } from 'src/base/types/requests.type';
 import { IAuthService } from 'src/modules/auth/services/auth.service.interface';
@@ -11,11 +11,15 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { USER_ROLE } from 'src/shared/constants/global.constants';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from 'src/base/decorators/roles.decorator';
+import { ForgetPasswordDto } from './dto/forget-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
-  constructor(private readonly _authService: IAuthService) {}
+  constructor(
+    private readonly _authService: IAuthService, // private readonly tokenService: TokenService,
+  ) {}
 
   // ==========
   // Sign In
@@ -200,5 +204,109 @@ export class AuthController {
   }
   // ==========
   // refreshToken
+  // ==========
+
+  // ==========
+  // forget password
+  // ==========
+
+  @Post('forget-password')
+  @ApiBody({
+    type: ForgetPasswordDto,
+    examples: {
+      user: {
+        value: {
+          email: 'exampleuser@myzens.net',
+        } as ForgetPasswordDto,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'User exits',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 400,
+          message: 'ATH_0091',
+          details: 'User exits!!!',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'success',
+    content: {
+      'application/json': {
+        example: {
+          message: 'An otp email has been sent to your email, please check',
+        },
+      },
+    },
+  })
+  async forgetPassword(@Body() payload: ForgetPasswordDto) {
+    return await this._authService.forgetPassword(payload);
+  }
+  // ==========
+  // forget password
+  // ==========
+
+  // ==========
+  // change password
+  // ==========
+
+  @Post('change-password')
+  @ApiBody({
+    type: ChangePasswordDto,
+    examples: {
+      user: {
+        value: {
+          email: 'exampleuser@myzens.net',
+          newPassword: '12345678',
+          otpCode: '111111',
+        } as ChangePasswordDto,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'success',
+    content: {
+      'application/json': {
+        example: {
+          message: 'An otp email has been sent to your email, please check',
+        },
+      },
+    },
+  })
+  async changePassword(@Body() payload: ChangePasswordDto) {
+    return await this._authService.changePassword(payload);
+  }
+  // ==========
+  // change password
+  // ==========
+
+  // ==========
+  // logout
+  // ==========
+
+  @UseGuards(JwtAccessTokenGuard)
+  @Get('logout')
+  @ApiResponse({
+    status: 201,
+    description: 'success',
+    content: {
+      'application/json': {
+        example: 'logout success',
+      },
+    },
+  })
+  async logout(@Req() request: RequestWithUser) {
+    const { user } = request;
+    await this._authService.logout(user.id);
+  }
+  // ==========
+  // logout
   // ==========
 }

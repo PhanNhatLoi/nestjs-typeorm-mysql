@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import * as crypto from 'crypto';
 import { JwtServiceConfig } from 'src/configs/config.interface';
 import { IAuthService } from 'src/modules/auth/services/auth.service.interface';
 import {
@@ -27,6 +26,11 @@ import { SignUpTemplate } from 'src/modules/sendmail/template/signUp-html';
 import { IUserVerifyService } from 'src/modules/user-verify/services/user-verify.service.interface';
 import { VerifyEmailDto } from '../dto/verify-email.dto';
 import { USER_ROLE } from 'src/shared/constants/global.constants';
+import { ForgetPasswordDto } from '../dto/forget-password.dto';
+import { ForgotTemplate } from 'src/modules/sendmail/template/fogotpassword-html';
+import { ChangePasswordDto } from '../dto/change-password.dto';
+import * as bcrypt from 'bcrypt';
+import { saltOrRounds } from 'src/modules/user-account/services/user-account.service';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -48,16 +52,12 @@ export class AuthService implements IAuthService {
   ): Promise<UserAccount> {
     try {
       const user = await this._userAccountService.get(id);
-      if (!user) {
+      if (!user.response || !user.response.isLoggedIn) {
         throw new UnauthorizedException({
           message: ERRORS_DICTIONARY.UNAUTHORIZED_EXCEPTION,
           details: 'Unauthorized',
         });
       }
-      // await this.verifyPlainContentWithHashedContent(
-      //   refreshToken,
-      //   user.refreshToken,
-      // );
       return user.response;
     } catch (error) {
       throw error;
@@ -93,6 +93,10 @@ export class AuthService implements IAuthService {
           role: userDto.role,
           socialLinks: [],
           achievements: [],
+          location: {
+            lat: 0,
+            lng: 0,
+          },
         });
       }
 
@@ -129,7 +133,7 @@ export class AuthService implements IAuthService {
         user: {
           email: userAccount.response.email,
         },
-        code: verifyEmailDto.otp,
+        otp: verifyEmailDto.otp,
       });
 
       if (!otpCode.response) {
@@ -160,6 +164,7 @@ export class AuthService implements IAuthService {
   async getInfo(id: number): Promise<AccountInfoResponseDto> {
     try {
       const user = await this._userAccountService.get(id);
+      delete user.response.isLoggedIn;
       return user.response;
     } catch (error) {
       throw error;
@@ -174,7 +179,11 @@ export class AuthService implements IAuthService {
       const refreshToken = await this.generateRefreshToken({
         id,
       });
-      // await this.storeRefreshToken(id, refreshToken);
+
+      await this._userAccountService.update(id, {
+        isLoggedIn: true,
+      });
+
       return {
         accessToken,
         refreshToken,
@@ -214,8 +223,8 @@ export class AuthService implements IAuthService {
         });
       }
 
-      const hash = crypto.scryptSync(password, 'salt', 32).toString('hex');
-      if (hash !== user.response.password) {
+      const isMatch = await bcrypt.compare(password, user.response.password);
+      if (!isMatch) {
         throw new BadRequestException({
           message: ERRORS_DICTIONARY.WRONG_CREDENTIALS,
           details: 'Wrong credentials!!',
@@ -256,5 +265,94 @@ export class AuthService implements IAuthService {
         expiresIn: `${this._jwtServiceConfig.refreshTokenExpirationTime}`,
       }),
     );
+  }
+
+  async forgetPassword(payload: ForgetPasswordDto): Promise<String> {
+    try {
+      const userAccount = await this._userAccountService.findParams({
+        email: payload.email,
+      });
+
+      if (
+        !userAccount.response ||
+        userAccount.response.role === USER_ROLE.SUPPER_ADMIN
+      ) {
+        throw new BadRequestException({
+          message: ERRORS_DICTIONARY.USER_NOT_FOUND,
+          details: 'User not found!!',
+        });
+      }
+
+      const newCode = Math.floor(100000 + Math.random() * 900000).toString(); //generate code 6 digit
+      const htmlTemplate = ForgotTemplate(newCode);
+      await this.sendMailService.sendmail({
+        sendTo: payload.email,
+        subject: '<noreply> This is email verify Email forgotPassword',
+        content: htmlTemplate,
+      });
+      await this._userVerifyService.create({
+        email: payload.email,
+        otp: newCode,
+      });
+
+      return 'An otp email has been sent to your email, please check';
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async changePassword(payload: ChangePasswordDto): Promise<String> {
+    const userAccount = await this._userAccountService.findParams({
+      email: payload.email,
+    });
+
+    if (!userAccount.response) {
+      throw new BadRequestException({
+        message: ERRORS_DICTIONARY.USER_NOT_FOUND,
+        details: 'User not found!!',
+      });
+    }
+
+    const otpCode = await this._userVerifyService.get({
+      user: {
+        email: payload.email,
+      },
+      otp: payload.otpCode,
+    });
+
+    if (!otpCode.response) {
+      throw new BadRequestException({
+        message: ERRORS_DICTIONARY.WRONG_CREDENTIALS,
+        details: 'Otp wrong!!',
+      });
+    }
+
+    if (
+      !otpCode.response.expiresDate ||
+      new Date(otpCode.response.expiresDate).getTime() < new Date().getTime()
+    ) {
+      throw new BadRequestException({
+        message: ERRORS_DICTIONARY.VALIDATION_ERROR,
+        details: 'Otp exp!!',
+      });
+    }
+
+    const newPasswordHash = await bcrypt.hash(
+      payload.newPassword,
+      saltOrRounds,
+    );
+    await this._userAccountService.update(userAccount.response.id, {
+      password: newPasswordHash,
+    });
+
+    return 'Change password successfully';
+  }
+
+  async logout(id: number): Promise<string> {
+    await this._userAccountService.update(id, {
+      isLoggedIn: false,
+    });
+    // await this._userAccountService.update()
+    return 'Logout success';
   }
 }
