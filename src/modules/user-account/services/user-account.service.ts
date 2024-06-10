@@ -125,4 +125,19 @@ export class UserAccountService implements IUserAccountService {
     const result = await this._userAccountRepository.delete(Account);
     return Results.success(result);
   }
+
+  async findUserWithRelations(userId: number): Promise<Result<UserAccount>> {
+    const user = await this._userAccountRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.subCategories', 'sub_category')
+      .leftJoinAndSelect('user.categories', 'category')
+      .leftJoinAndSelect('user.taxes', 'user_tax')
+      .where('user.id = :id', { id: userId })
+      .getOne();
+
+    delete user.isDeleted;
+    delete user.isLoggedIn;
+    delete user.password;
+    return Results.success(user);
+  }
 }

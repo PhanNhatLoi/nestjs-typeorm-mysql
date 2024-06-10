@@ -1,0 +1,161 @@
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsEmpty,
+  IsNumber,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+export class UpdateInformationDto {
+  //values invalid
+  @IsEmpty()
+  averageRating;
+  @IsEmpty()
+  emailVerified;
+
+  @IsEmpty()
+  createdDate;
+
+  @IsEmpty()
+  referralID;
+
+  @IsEmpty()
+  isDeleted;
+
+  @IsEmpty()
+  id;
+
+  @IsEmpty()
+  role;
+
+  @IsEmpty()
+  password;
+
+  @IsEmpty()
+  email;
+
+  //values invalid
+
+  @IsOptional()
+  @IsPhoneNumber('VI')
+  phone: string;
+  @IsString()
+  @IsOptional()
+  address: string;
+  @IsString()
+  @IsOptional()
+  job: string;
+  @IsString()
+  @IsOptional()
+  profileImage: string;
+  @IsString()
+  @IsOptional()
+  bannerMedia: string;
+  @IsString()
+  @IsOptional()
+  companyName: string;
+  @IsString()
+  @IsOptional()
+  websiteURL: string;
+  @IsString()
+  @IsOptional()
+  nationality: string;
+  @IsString()
+  @IsOptional()
+  favoriteBibleWords: string;
+  @IsString()
+  @IsOptional()
+  introduction: string;
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SocialLinkDto)
+  socialLinks: {
+    platform: string;
+    accountName: string;
+  }[];
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AchievementsDto)
+  achievements: {
+    title: string;
+    value: number;
+  }[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => TaxInformationDto)
+  tax: TaxInformationDto[];
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => LocationDto)
+  location: {
+    lat: number;
+    lng: number;
+  };
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @IsArray()
+  @Type(() => Number)
+  subCategories: Number;
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @IsArray()
+  @Type(() => Number)
+  categories: Number;
+  // ...field
+}
+
+export class SocialLinkDto {
+  @IsString()
+  platform: string;
+  @IsString()
+  accountName: string;
+}
+
+export class AchievementsDto {
+  @IsString()
+  title: string;
+  @IsNumber()
+  value: number;
+}
+
+export class LocationDto {
+  @IsNumber()
+  lat: number;
+  @IsNumber()
+  lng: number;
+}
+
+export class TaxInformationDto {
+  @IsString()
+  id: string;
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @IsArray()
+  @Type(() => Number)
+  businessTypeId: Number[];
+  @IsOptional()
+  @IsString()
+  address: string;
+  @IsOptional()
+  @IsString()
+  email: string;
+  @IsOptional()
+  @IsString()
+  taxCode: string;
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @IsArray()
+  @Type(() => String)
+  photoLicense: string;
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @IsArray()
+  @Type(() => String)
+  photoCatholic: string;
+}

@@ -2,6 +2,8 @@ import { USER_ROLE } from 'src/shared/constants/global.constants';
 import {
   Column,
   Entity,
+  JoinColumn,
+  JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryColumn,
@@ -9,6 +11,7 @@ import {
 } from 'typeorm';
 import { Tax } from './user-tax.entity';
 import { SubCategory } from './sub-category.entity';
+import { Category } from './category.entity';
 
 @Entity({ name: 'user_account' })
 export class UserAccount {
@@ -167,12 +170,23 @@ export class UserAccount {
   }[];
 
   // list tax information
-  @OneToMany(() => Tax, (tax) => tax.id)
-  tax: Tax[];
+  @OneToMany(() => Tax, (tax) => tax.createdBy)
+  @JoinColumn()
+  taxes: Tax[];
 
   // sub categories for filter
-  @ManyToMany(() => SubCategory, (category) => category.id, { nullable: true })
+  @ManyToMany(() => SubCategory, (subCategory) => subCategory.users, {
+    nullable: true,
+  })
+  @JoinTable()
   subCategories: SubCategory[];
+
+  // categories
+  @ManyToMany(() => Category, (category) => category.users, {
+    nullable: true,
+  })
+  @JoinTable()
+  categories: Category[];
 
   // average rating
   @Column('decimal', { precision: 2, scale: 1, default: 0 })

@@ -31,6 +31,7 @@ import { ForgotTemplate } from 'src/modules/sendmail/template/fogotpassword-html
 import { ChangePasswordDto } from '../dto/change-password.dto';
 import * as bcrypt from 'bcrypt';
 import { saltOrRounds } from 'src/modules/user-account/services/user-account.service';
+import { UpdateInformationDto } from '../dto/update-infor.dto';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -163,7 +164,7 @@ export class AuthService implements IAuthService {
 
   async getInfo(id: number): Promise<AccountInfoResponseDto> {
     try {
-      const user = await this._userAccountService.get(id);
+      const user = await this._userAccountService.findUserWithRelations(id);
       delete user.response.isLoggedIn;
       return user.response;
     } catch (error) {
@@ -352,7 +353,22 @@ export class AuthService implements IAuthService {
     await this._userAccountService.update(id, {
       isLoggedIn: false,
     });
-    // await this._userAccountService.update()
     return 'Logout success';
+  }
+
+  async updateInformation(
+    id: number,
+    payload: UpdateInformationDto,
+  ): Promise<AccountInfoResponseDto> {
+    try {
+      await this._userAccountService.update(id, {
+        ...payload,
+        modifiedDate: new Date(),
+      });
+      const user = await this.getInfo(id);
+      return user;
+    } catch (error) {
+      throw error;
+    }
   }
 }

@@ -3,11 +3,11 @@ import { Column, Entity, ManyToOne } from 'typeorm';
 import { UserAccount } from './user-account.entity';
 import { Category } from './category.entity';
 
-@Entity({ name: 'user-tax' })
+@Entity({ name: 'user_tax' })
 export class Tax extends BaseEntity {
   // user account id
-  @ManyToOne(() => UserAccount, (user) => user.id)
-  user: UserAccount;
+  @ManyToOne(() => UserAccount, (user) => user.taxes)
+  modifiedBy: UserAccount;
 
   // business type id
   @ManyToOne(() => Category, (category) => category.id)
