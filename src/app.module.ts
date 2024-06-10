@@ -9,6 +9,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SendmailModule } from './modules/sendmail/sendmail.module';
 import { GenerateDbModule } from './modules/generate-db/generate-db.module';
+import { UploadFileModule } from './modules/upload-file/upload-file.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { GenerateDbModule } from './modules/generate-db/generate-db.module';
     AuthModule,
     SendmailModule,
     GenerateDbModule,
+    UploadFileModule,
   ],
   controllers: [AppController],
   providers: [AppService],
