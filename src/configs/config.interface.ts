@@ -1,5 +1,4 @@
 import { SecuritySchemeObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
-
 export interface Config {
   environment: string;
   nest: NestConfig;

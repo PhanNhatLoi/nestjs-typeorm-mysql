@@ -1,3 +1,6 @@
+import { BadRequestException } from '@nestjs/common';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import {
   SWAGGER_PREFIX,
   SWAGGER_DES,
@@ -89,3 +92,37 @@ export const GLOBAL_CONFIG = () => ({
     go24Tracking: process.env.GO24_TRACKING_URL,
   },
 });
+
+export const multerConfig = {
+  storage: diskStorage({
+    destination: './files/images', // Directory where the files will be stored
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const ext = extname(file.originalname);
+      cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+    },
+  }),
+};
+
+export const multerPrivateConfig = {
+  storage: diskStorage({
+    destination: './files/images/private',
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const ext = extname(file.originalname);
+      cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+    },
+  }),
+};
+
+export const multerOptions = {
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
+      return cb(new BadRequestException('Unsupported file type'), false);
+    }
+    cb(null, true);
+  },
+  limits: {
+    fileSize: 1024 * 1024 * 5, // 5 MB
+  },
+};
