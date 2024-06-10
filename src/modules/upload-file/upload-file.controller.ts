@@ -18,7 +18,7 @@ import {
   multerConfig,
   multerOptions,
   multerPrivateConfig,
-} from 'src/configs/config.interface';
+} from 'src/configs/configuration.config';
 import { join } from 'path';
 
 @Controller('file')
