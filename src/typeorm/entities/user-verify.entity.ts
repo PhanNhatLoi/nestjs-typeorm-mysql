@@ -29,6 +29,8 @@ export class UserVerify {
   expiresDate: Date;
 
   @Column({
+    type: 'varchar',
+    length: 6,
     default: '',
     name: 'otp',
   })

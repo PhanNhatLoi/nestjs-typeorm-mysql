@@ -8,6 +8,7 @@ import { USER_ACTION_TYPE } from 'src/shared/constants/global.constants';
 export class UserAction extends BaseEntity {
   @Column({
     nullable: true,
+    default: '',
     name: 'content',
   })
   content: string;
@@ -15,6 +16,7 @@ export class UserAction extends BaseEntity {
   @Column({
     name: 'ActionType',
     type: 'enum',
+    default: USER_ACTION_TYPE.VIEW,
     enum: USER_ACTION_TYPE,
   })
   actionType: USER_ACTION_TYPE;
@@ -25,6 +27,7 @@ export class UserAction extends BaseEntity {
     type: 'decimal',
     precision: 2,
     scale: 1,
+    default: 0,
   })
   value: number;
 

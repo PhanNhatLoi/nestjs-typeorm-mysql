@@ -2,11 +2,13 @@ import { USER_ROLE } from 'src/shared/constants/global.constants';
 import {
   Column,
   Entity,
+  ManyToMany,
   OneToMany,
   PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Tax } from './tax.entity';
+import { Tax } from './user-tax.entity';
+import { SubCategory } from './sub-category.entity';
 
 @Entity({ name: 'user_account' })
 export class UserAccount {
@@ -35,12 +37,14 @@ export class UserAccount {
   // phone number
   @Column({
     name: 'Phone',
+    default: '',
   })
   phone: string;
 
   // password login
   @Column({
     name: 'Password',
+    default: '',
   })
   password: string;
 
@@ -64,6 +68,7 @@ export class UserAccount {
   @Column({
     type: 'enum',
     enum: USER_ROLE,
+    default: USER_ROLE.USER,
   })
   role: USER_ROLE;
 
@@ -143,6 +148,7 @@ export class UserAccount {
   @Column({
     type: 'json',
     name: 'SocialLinks',
+    nullable: true,
   })
   socialLinks: {
     platform: string;
@@ -153,6 +159,7 @@ export class UserAccount {
   @Column({
     type: 'json',
     name: 'Achievements',
+    nullable: true,
   })
   achievements: {
     title: string;
@@ -162,6 +169,10 @@ export class UserAccount {
   // list tax information
   @OneToMany(() => Tax, (tax) => tax.id)
   tax: Tax[];
+
+  // sub categories for filter
+  @ManyToMany(() => SubCategory, (category) => category.id, { nullable: true })
+  subCategories: SubCategory[];
 
   // average rating
   @Column('decimal', { precision: 2, scale: 1, default: 0 })

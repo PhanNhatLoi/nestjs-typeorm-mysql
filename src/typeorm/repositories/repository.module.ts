@@ -5,14 +5,14 @@ import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 import { UserAccountRepository } from 'src/typeorm/repositories/user-account.repository';
 import { UserVerify } from '../entities/user-verify.entity';
 import { UserVerifyRepository } from './user-verify.repository';
-import { BusinessRepository } from './business.repository';
-import { Business } from '../entities/business.entity';
 import { TaxRepository } from './tax.repository';
-import { Tax } from '../entities/tax.entity';
+import { Tax } from '../entities/user-tax.entity';
 import { UserAction } from '../entities/user-action.entity';
 import { UserActionRepository } from './user-action.repository';
 import { Discount } from '../entities/discount.entity';
 import { DiscountRepository } from './discount.repository';
+import { Category } from '../entities/category.entity';
+import { SubCategory } from '../entities/sub-category.entity';
 
 @Module({
   providers: [],
@@ -33,11 +33,6 @@ export class RepositoryModule {
         scope: Scope.REQUEST,
       },
       {
-        provide: 'IBusinessRepository',
-        useClass: BusinessRepository,
-        scope: Scope.REQUEST,
-      },
-      {
         provide: 'ITaxInformationRepository',
         useClass: TaxRepository,
         scope: Scope.REQUEST,
@@ -52,11 +47,29 @@ export class RepositoryModule {
         useClass: DiscountRepository,
         scope: Scope.REQUEST,
       },
+      {
+        provide: 'ICategory',
+        useClass: Category,
+        scope: Scope.REQUEST,
+      },
+      {
+        provide: 'ISubCategory',
+        useClass: SubCategory,
+        scope: Scope.REQUEST,
+      },
     ];
 
     const imports = [
       TypeOrmModule.forFeature(
-        [UserAccount, UserVerify, Business, Tax, UserAction, Discount],
+        [
+          UserAccount,
+          UserVerify,
+          Tax,
+          UserAction,
+          Discount,
+          Category,
+          SubCategory,
+        ],
         'identity',
       ),
     ];
