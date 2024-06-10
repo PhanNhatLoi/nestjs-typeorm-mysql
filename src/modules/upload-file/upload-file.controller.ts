@@ -2,7 +2,6 @@ import {
   Controller,
   FileTypeValidator,
   Get,
-  MaxFileSizeValidator,
   Param,
   ParseFilePipe,
   Post,
@@ -20,8 +19,10 @@ import {
   multerPrivateConfig,
 } from 'src/configs/configuration.config';
 import { join } from 'path';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('file')
+@ApiTags('file-upload')
 export class UploadFileController {
   constructor(private readonly _fileService: IUploadFileService) {}
 
