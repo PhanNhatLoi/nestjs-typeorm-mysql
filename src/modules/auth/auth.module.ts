@@ -74,7 +74,6 @@ import { TaxRepository } from 'src/typeorm/repositories/tax.repository';
       provide: 'ISubCategoryRepository',
       useClass: SubCategoryRepository,
     },
-
     {
       provide: 'ICategoryRepository',
       useClass: CategoryRepository,

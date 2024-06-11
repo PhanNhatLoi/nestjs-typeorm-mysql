@@ -1,5 +1,5 @@
 import { BaseEntity } from 'src/base/entities/base-entity';
-import { Column, Entity, ManyToMany, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne } from 'typeorm';
 import { Category } from './category.entity';
 import { UserAccount } from './user-account.entity';
 
@@ -27,6 +27,7 @@ export class SubCategory extends BaseEntity {
   imageUrl: string;
 
   @ManyToOne(() => Category, (category) => category.children)
+  @JoinColumn()
   parent: Category;
 
   // sub categories for filter

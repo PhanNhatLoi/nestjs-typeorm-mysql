@@ -104,6 +104,7 @@ export class AuthService implements IAuthService {
             lat: 0,
             lng: 0,
           },
+          bannerMedia: [],
         });
       }
 
@@ -162,6 +163,7 @@ export class AuthService implements IAuthService {
       await this._userAccountService.update(userAccount.response.id, {
         emailVerified: true,
       });
+      await this._userVerifyService.delete(otpCode.response.id);
       return 'Activated email success';
     } catch (error) {
       throw error;

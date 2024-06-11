@@ -15,6 +15,9 @@ export class UserVerify {
   })
   id: number;
 
+  @Column({ default: false, name: 'IsDeleted' })
+  isDeleted: boolean;
+
   @Column({
     type: 'datetime',
     name: 'CreatedDate',

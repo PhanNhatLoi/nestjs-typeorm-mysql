@@ -7,7 +7,11 @@ import { Results } from 'src/base/response/result-builder';
 import { CreateCategoryDto } from './dto/CreateCategory.dto';
 import { ERRORS_DICTIONARY } from 'src/shared/constants/error-dictionary.constaint';
 import { DefaultFilterQueryable } from 'src/base/infrastructure/default-filter.queryable';
-import { In } from 'typeorm';
+import { DeepPartial, In, Like, Not } from 'typeorm';
+import { FilterCategoryDto } from './dto/filter-category.dto';
+import { PaginationResult } from 'src/base/response/pagination.result';
+import { UserAccount } from 'src/typeorm/entities/user-account.entity';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoryService implements ICategoryService {
@@ -15,7 +19,10 @@ export class CategoryService implements ICategoryService {
     @Inject('ICategoryRepository')
     private readonly _categoryRepository: ICategoryRepository,
   ) {}
-  async create(payload: CreateCategoryDto): Promise<Result<Category>> {
+  async create(
+    user: DeepPartial<UserAccount>,
+    payload: CreateCategoryDto,
+  ): Promise<Result<Category>> {
     const checkUnique = await this._categoryRepository.findOneByConditions({
       where: {
         name: payload.name,
@@ -24,13 +31,17 @@ export class CategoryService implements ICategoryService {
     if (checkUnique) {
       throw new BadRequestException({
         message: ERRORS_DICTIONARY.ALREADY_EXISTS,
-        details: 'User exits!!!',
+        details: 'Category name exits!!!',
       });
     }
-    const result = await this._categoryRepository.create({
+    const result = await this._categoryRepository.save({
       ...payload,
+      createdBy: user,
+      modifiedBy: user,
+      modifiedDate: new Date(),
       createdDate: new Date(),
     });
+
     return Results.success(result);
   }
   async get(id: number): Promise<Result<Category>> {
@@ -47,12 +58,15 @@ export class CategoryService implements ICategoryService {
     return Results.success(result);
   }
 
-  async delete(id: number): Promise<Result<Category>> {
-    const Account = await this._categoryRepository.findOneById(id);
-    if (!Account) {
-      return Results.notFound();
+  async delete(id: number): Promise<Result<Boolean>> {
+    const category = await this._categoryRepository.findOneById(id);
+    if (!category) {
+      throw new BadRequestException({
+        message: ERRORS_DICTIONARY.NOT_FOUND,
+        details: 'Category not found!!!',
+      });
     }
-    const result = await this._categoryRepository.delete(Account);
+    const result = await this._categoryRepository.softDelete(id);
     return Results.success(result);
   }
 
@@ -67,21 +81,56 @@ export class CategoryService implements ICategoryService {
     return Results.success(result);
   }
 
-  //   async update(
-  //     id: number,
-  //     payload: UpdateUserAccountDto,
-  //   ): Promise<Result<UserAccount>> {
-  //     const Account = await this._userAccountRepository.findOneById(id);
-  //     if (!Account) {
-  //       return Results.notFound();
-  //     }
-  //     const updatedAccount = {
-  //       ...Account,
-  //       ...payload,
-  //       ModifiedBy: 1,
-  //       ModifiedDate: new Date(),
-  //     };
-  //     const result = await this._userAccountRepository.save(updatedAccount);
-  //     return Results.success(result);
-  //   }
+  async getPagination(
+    filter: FilterCategoryDto,
+  ): Promise<Result<PaginationResult<Category>>> {
+    const conditions = {} as any;
+    if (filter.name) {
+      conditions.name = Like(`%${filter.name}%`);
+    }
+    const result = await this._categoryRepository.getPagination(
+      filter.page || 1,
+      filter.limit || 5,
+      {
+        where: conditions,
+        order: filter.orderByQueryClause,
+      },
+    );
+    return Results.success(result);
+  }
+
+  async update(
+    user: DeepPartial<UserAccount>,
+    id: number,
+    payload: UpdateCategoryDto,
+  ): Promise<Result<Category>> {
+    const category = await this._categoryRepository.findOneById(id);
+    if (!category) {
+      throw new BadRequestException({
+        message: ERRORS_DICTIONARY.NOT_FOUND,
+        details: 'Category not found!!!',
+      });
+    }
+    const checkUnique = await this._categoryRepository.findOneByConditions({
+      where: {
+        name: payload.name,
+        id: Not(id),
+      },
+    });
+    if (checkUnique) {
+      throw new BadRequestException({
+        message: ERRORS_DICTIONARY.ALREADY_EXISTS,
+        details: 'Category name exist!!!',
+      });
+    }
+
+    const result = await this._categoryRepository.create({
+      ...category,
+      ...payload,
+      modifiedBy: user,
+      modifiedDate: new Date(),
+    });
+    await this._categoryRepository.save(result);
+    return Results.success(result);
+  }
 }

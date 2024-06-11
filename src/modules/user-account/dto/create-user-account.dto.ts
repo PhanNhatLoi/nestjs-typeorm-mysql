@@ -17,4 +17,5 @@ export class CreateUserAccountDto {
     lat: number;
     lng: number;
   };
+  bannerMedia: string[];
 }

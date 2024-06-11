@@ -87,9 +87,8 @@ export class UpdateInformationDto {
   @IsString()
   @IsOptional()
   nationality: string;
-  @IsString()
   @IsOptional()
-  favoriteBibleWords: string;
+  favoriteBibleWords: any;
   @IsString()
   @IsOptional()
   introduction: string;

@@ -63,4 +63,15 @@ export class UserVerifyService implements IUserVerifyService {
 
     return Results.success(result);
   }
+  async delete(id: number): Promise<Result<UserVerify>> {
+    const otp = await this._userVerifyRepository.findOneById(id);
+    if (!otp) {
+      throw new BadRequestException({
+        message: ERRORS_DICTIONARY.NOT_FOUND,
+        details: 'otp code not found!!!',
+      });
+    }
+    const result = await this._userVerifyRepository.delete(otp);
+    return Results.success(result);
+  }
 }

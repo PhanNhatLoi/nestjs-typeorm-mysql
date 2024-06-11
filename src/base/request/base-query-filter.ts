@@ -13,7 +13,7 @@ export interface IBaseQueryFilter {
 
 export class BaseQueryFilter implements IBaseQueryFilter {
   @ApiProperty({
-    minimum: 0,
+    minimum: 1,
     maximum: 10000,
     title: 'Page',
     exclusiveMaximum: true,
@@ -24,7 +24,7 @@ export class BaseQueryFilter implements IBaseQueryFilter {
   page: number;
 
   @ApiProperty({
-    minimum: 0,
+    minimum: 1,
     maximum: 10000,
     title: 'Limit',
     exclusiveMaximum: true,

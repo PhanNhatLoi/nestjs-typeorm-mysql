@@ -2,8 +2,8 @@ import {
   Body,
   Controller,
   Get,
-  Patch,
   Post,
+  Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -324,7 +324,7 @@ export class AuthController {
   // update information
   // ==========
 
-  @Patch('update-information')
+  @Put('update-information')
   @ApiBody({
     type: SignUpDto,
     examples: {

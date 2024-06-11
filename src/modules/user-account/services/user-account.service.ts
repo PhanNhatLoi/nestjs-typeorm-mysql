@@ -48,7 +48,6 @@ export class UserAccountService implements IUserAccountService {
 
     const newAccount = {
       ...payload,
-
       password: passwordHash,
       createdDate: new Date(),
       modifiedDate: new Date(),
