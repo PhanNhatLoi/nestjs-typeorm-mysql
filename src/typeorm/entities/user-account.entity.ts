@@ -6,6 +6,7 @@ import {
   JoinTable,
   ManyToMany,
   OneToMany,
+  OneToOne,
   PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -170,9 +171,9 @@ export class UserAccount {
   }[];
 
   // list tax information
-  @OneToMany(() => Tax, (tax) => tax.createdBy)
-  @JoinColumn()
-  taxes: Tax[];
+  @OneToOne(() => Tax, (tax) => tax.createdBy)
+  // @JoinColumn()
+  tax: Tax;
 
   // sub categories for filter
   @ManyToMany(() => SubCategory, (subCategory) => subCategory.users, {

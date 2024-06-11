@@ -8,6 +8,31 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
+
+export class TaxInformationDto {
+  @IsOptional()
+  @IsString()
+  businessType: string;
+  @IsOptional()
+  @IsString()
+  address: string;
+  @IsOptional()
+  @IsString()
+  email: string;
+  @IsOptional()
+  @IsString()
+  taxCode: string;
+  @IsOptional()
+  // @ValidateNested({ each: true })
+  @IsArray()
+  @Type(() => String)
+  photoLicense: string[];
+  @IsOptional()
+  // @ValidateNested({ each: true })
+  @IsArray()
+  @Type(() => String)
+  photoCatholic: string[];
+}
 export class UpdateInformationDto {
   //values invalid
   @IsEmpty()
@@ -86,10 +111,9 @@ export class UpdateInformationDto {
   }[];
 
   @IsOptional()
-  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => TaxInformationDto)
-  tax: TaxInformationDto[];
+  tax: TaxInformationDto;
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => LocationDto)
@@ -98,15 +122,12 @@ export class UpdateInformationDto {
     lng: number;
   };
   @IsOptional()
-  @ValidateNested({ each: true })
   @IsArray()
-  @Type(() => Number)
-  subCategories: Number;
+  subCategories: number[];
   @IsOptional()
-  @ValidateNested({ each: true })
   @IsArray()
   @Type(() => Number)
-  categories: Number;
+  categories: number[];
   // ...field
 }
 
@@ -129,33 +150,4 @@ export class LocationDto {
   lat: number;
   @IsNumber()
   lng: number;
-}
-
-export class TaxInformationDto {
-  @IsString()
-  id: string;
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @IsArray()
-  @Type(() => Number)
-  businessTypeId: Number[];
-  @IsOptional()
-  @IsString()
-  address: string;
-  @IsOptional()
-  @IsString()
-  email: string;
-  @IsOptional()
-  @IsString()
-  taxCode: string;
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @IsArray()
-  @Type(() => String)
-  photoLicense: string;
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @IsArray()
-  @Type(() => String)
-  photoCatholic: string;
 }

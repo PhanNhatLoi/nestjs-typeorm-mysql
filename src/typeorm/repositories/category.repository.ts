@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Category } from '../entities/category.entity';
 import { ICategoryRepository } from './abstractions/category.repository.interface';
 
-export class TaxRepository
+export class CategoryRepository
   extends BaseRepository<Category>
   implements ICategoryRepository
 {

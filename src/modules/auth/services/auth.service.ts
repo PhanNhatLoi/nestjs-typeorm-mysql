@@ -32,6 +32,9 @@ import { ChangePasswordDto } from '../dto/change-password.dto';
 import * as bcrypt from 'bcrypt';
 import { saltOrRounds } from 'src/modules/user-account/services/user-account.service';
 import { UpdateInformationDto } from '../dto/update-infor.dto';
+import { ICategoryService } from 'src/modules/category/services/category.service.interface';
+import { ISubCategoryService } from 'src/modules/sub-category/services/sub-category.service.interface';
+import { IUserTaxService } from 'src/modules/user-tax/services/user-tax.service.interface';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -42,6 +45,9 @@ export class AuthService implements IAuthService {
     private readonly _jwtService: JwtService,
     private readonly sendMailService: SendmailService,
     private readonly _userVerifyService: IUserVerifyService,
+    private readonly _categoryService: ICategoryService,
+    private readonly _subCategoryService: ISubCategoryService,
+    private readonly _userTaxService: IUserTaxService,
     configService: ConfigService,
   ) {
     this._jwtServiceConfig =
@@ -361,12 +367,46 @@ export class AuthService implements IAuthService {
     payload: UpdateInformationDto,
   ): Promise<AccountInfoResponseDto> {
     try {
-      await this._userAccountService.update(id, {
-        ...payload,
-        modifiedDate: new Date(),
-      });
       const user = await this.getInfo(id);
-      return user;
+      const categories = await this._categoryService.getByIds(
+        payload.categories || [],
+      );
+      const subCategories = await this._subCategoryService.getByIds(
+        payload.subCategories || [],
+      );
+
+      if (user.tax) {
+        await this._userTaxService.update(user.tax.id, {
+          ...user.tax,
+          ...payload.tax,
+        });
+      } else {
+        const newTax = await this._userTaxService.create({
+          businessType: '',
+          address: '',
+          email: 'string',
+          taxCode: 'string',
+          photoLicense: [],
+          photoCatholic: [],
+          ...payload.tax,
+          modifiedBy: user,
+          createdBy: user,
+        });
+
+        user.tax = newTax.response;
+      }
+
+      await this._userAccountService.update(id, {
+        ...user,
+        ...payload,
+        categories: (payload.categories && categories.response) || undefined,
+        subCategories:
+          (payload.subCategories && subCategories.response) || undefined,
+        modifiedDate: new Date(),
+        // tax: tax,
+      });
+
+      return await this.getInfo(id);
     } catch (error) {
       throw error;
     }

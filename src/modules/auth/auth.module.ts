@@ -18,12 +18,27 @@ import { UserVerifyService } from '../user-verify/services/user-verify.service';
 import { UserVerify } from 'src/typeorm/entities/user-verify.entity';
 import { UserVerifyRepository } from 'src/typeorm/repositories/user-verify.repository';
 import { AuthController } from './auth.controller';
+import { CategoryService } from '../category/services/category.service';
+import { ICategoryService } from '../category/services/category.service.interface';
+import { SubCategoryService } from '../sub-category/services/sub-category.service';
+import { ISubCategoryService } from '../sub-category/services/sub-category.service.interface';
+import { IUserTaxService } from '../user-tax/services/user-tax.service.interface';
+import { UserTaxService } from '../user-tax/services/user-tax.service';
+import { Tax } from 'src/typeorm/entities/user-tax.entity';
+import { CategoryRepository } from 'src/typeorm/repositories/category.repository';
+import { Category } from 'src/typeorm/entities/category.entity';
+import { SubCategoryRepository } from 'src/typeorm/repositories/sub-category.repository';
+import { SubCategory } from 'src/typeorm/entities/sub-category.entity';
+import { TaxRepository } from 'src/typeorm/repositories/tax.repository';
 
 @Module({
   imports: [
     PassportModule,
     JwtModule.register({}),
-    TypeOrmModule.forFeature([UserAccount, UserVerify], 'identity'),
+    TypeOrmModule.forFeature(
+      [UserAccount, UserVerify, Category, SubCategory, Tax],
+      'identity',
+    ),
   ],
   controllers: [AdminController, AuthController],
   providers: [
@@ -40,6 +55,31 @@ import { AuthController } from './auth.controller';
       useClass: UserVerifyService,
     },
     {
+      provide: ICategoryService,
+      useClass: CategoryService,
+    },
+    {
+      provide: ISubCategoryService,
+      useClass: SubCategoryService,
+    },
+    {
+      provide: IUserTaxService,
+      useClass: UserTaxService,
+    },
+    {
+      provide: 'ITaxRepository',
+      useClass: TaxRepository,
+    },
+    {
+      provide: 'ISubCategoryRepository',
+      useClass: SubCategoryRepository,
+    },
+
+    {
+      provide: 'ICategoryRepository',
+      useClass: CategoryRepository,
+    },
+    {
       provide: 'IUserVerifyRepository',
       useClass: UserVerifyRepository,
     },
@@ -47,7 +87,6 @@ import { AuthController } from './auth.controller';
       provide: 'IUserAccountRepository',
       useClass: UserAccountRepository,
     },
-
     LocalStrategy,
     JwtAccessTokenStrategy,
     JwtRefreshTokenStrategy,
