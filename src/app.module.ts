@@ -5,13 +5,13 @@ import { AuthModule } from 'src/modules/auth/auth.module';
 import { SharedModule } from 'src/shared/shared.module';
 import { DbContextModule } from 'src/typeorm/db-context.module';
 import { RepositoryModule } from 'src/typeorm/repositories/repository.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { SendmailModule } from './modules/sendmail/sendmail.module';
-import { UploadFileModule } from './modules/upload-file/upload-file.module';
-import { CategoryModule } from './modules/category/category.module';
-import { SubCategoryModule } from './modules/sub-category/sub-category.module';
-import { UserTaxModule } from './modules/user-tax/user-tax.module';
+import { AppController } from 'src/app.controller';
+import { AppService } from 'src/app.service';
+import { SendmailModule } from '@modules/sendmail/sendmail.module';
+import { UploadFileModule } from '@modules/upload-file/upload-file.module';
+import { CategoryModule } from '@modules/category/category.module';
+import { SubCategoryModule } from '@modules/sub-category/sub-category.module';
+import { UserTaxModule } from '@modules/user-tax/user-tax.module';
 
 @Module({
   imports: [

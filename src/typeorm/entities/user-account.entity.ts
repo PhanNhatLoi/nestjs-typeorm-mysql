@@ -86,11 +86,10 @@ export class UserAccount {
 
   // banner user url public
   @Column({
-    nullable: true,
-    default: '',
+    type: 'json',
     name: 'BannerMedia',
   })
-  bannerMedia: string;
+  bannerMedia: string[];
 
   // referralId (use when user invite friend)
   // maybe change to relative many to one table user_account
@@ -134,11 +133,10 @@ export class UserAccount {
 
   // Favorite bible words
   @Column({
-    default: '',
-    nullable: true,
+    type: 'json',
     name: 'FavoriteBibleWords',
   })
-  favoriteBibleWords: string;
+  favoriteBibleWords: any;
 
   // Introduction
   @Column({

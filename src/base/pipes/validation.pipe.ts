@@ -1,6 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
-import { DataValidationException } from '../exceptions/data-validation.exception';
+import { DataValidationException } from 'src/base/exceptions/data-validation.exception';
 
 export interface ValidationErrorProperty {
   property: string;

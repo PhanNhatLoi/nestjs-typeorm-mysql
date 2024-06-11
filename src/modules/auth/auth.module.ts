@@ -12,18 +12,18 @@ import { UserAccountService } from 'src/modules/user-account/services/user-accou
 import { IUserAccountService } from 'src/modules/user-account/services/user-account.service.interface';
 import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 import { UserAccountRepository } from 'src/typeorm/repositories/user-account.repository';
-import { SendmailService } from '../sendmail/sendmail.service';
-import { IUserVerifyService } from '../user-verify/services/user-verify.service.interface';
-import { UserVerifyService } from '../user-verify/services/user-verify.service';
+import { SendmailService } from 'src/modules/sendmail/sendmail.service';
+import { IUserVerifyService } from 'src/modules/user-verify/services/user-verify.service.interface';
+import { UserVerifyService } from 'src/modules/user-verify/services/user-verify.service';
 import { UserVerify } from 'src/typeorm/entities/user-verify.entity';
 import { UserVerifyRepository } from 'src/typeorm/repositories/user-verify.repository';
 import { AuthController } from './auth.controller';
-import { CategoryService } from '../category/services/category.service';
-import { ICategoryService } from '../category/services/category.service.interface';
-import { SubCategoryService } from '../sub-category/services/sub-category.service';
-import { ISubCategoryService } from '../sub-category/services/sub-category.service.interface';
-import { IUserTaxService } from '../user-tax/services/user-tax.service.interface';
-import { UserTaxService } from '../user-tax/services/user-tax.service';
+import { CategoryService } from 'src/modules/category/services/category.service';
+import { ICategoryService } from 'src/modules/category/services/category.service.interface';
+import { SubCategoryService } from 'src/modules/sub-category/services/sub-category.service';
+import { ISubCategoryService } from 'src/modules/sub-category/services/sub-category.service.interface';
+import { IUserTaxService } from 'src/modules/user-tax/services/user-tax.service.interface';
+import { UserTaxService } from 'src/modules/user-tax/services/user-tax.service';
 import { Tax } from 'src/typeorm/entities/user-tax.entity';
 import { CategoryRepository } from 'src/typeorm/repositories/category.repository';
 import { Category } from 'src/typeorm/entities/category.entity';
@@ -74,7 +74,6 @@ import { TaxRepository } from 'src/typeorm/repositories/tax.repository';
       provide: 'ISubCategoryRepository',
       useClass: SubCategoryRepository,
     },
-
     {
       provide: 'ICategoryRepository',
       useClass: CategoryRepository,
