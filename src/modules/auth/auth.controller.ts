@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RequestWithUser } from 'src/base/types/requests.type';
 import { IAuthService } from 'src/modules/auth/services/auth.service.interface';
@@ -13,6 +21,8 @@ import { RolesGuard } from './guards/roles.guard';
 import { Roles } from 'src/base/decorators/roles.decorator';
 import { ForgetPasswordDto } from './dto/forget-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateInformationDto } from './dto/update-infor.dto';
+import { AccountInfoResponseDto } from './dto/auth-response.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -308,5 +318,57 @@ export class AuthController {
   }
   // ==========
   // logout
+  // ==========
+
+  // ==========
+  // update information
+  // ==========
+
+  @Patch('update-information')
+  @ApiBody({
+    type: SignUpDto,
+    examples: {
+      user: {
+        value: {
+          email: 'exampleuser@myzens.net',
+          password: '12345678',
+          phone: '+84 361111111',
+          role: USER_ROLE.USER,
+        } as SignUpDto,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'success',
+    content: {
+      'application/json': {
+        example: {
+          id: 1,
+          createdDate: '2024-06-04T02:16:42.000Z',
+          modifiedDate: new Date(),
+          email: 'useraccount@myzens.net',
+          address: '12abc, TP.Ho Chi Minh',
+          job: 'developer',
+          roleId: USER_ROLE.USER,
+          imageUrl: 'image_path.png',
+          phone: '+84361111111',
+          referralID: '',
+          emailVerified: true,
+        },
+      },
+    },
+  })
+  @UseGuards(JwtAccessTokenGuard, RolesGuard)
+  @Roles(USER_ROLE.ENTERPRISE, USER_ROLE.USER)
+  async updateInformation(
+    @Body() payload: UpdateInformationDto,
+    @Req() req,
+  ): Promise<AccountInfoResponseDto> {
+    const { user } = req;
+    return await this._authService.updateInformation(user.id, payload);
+  }
+  // ==========
+  // update information
   // ==========
 }

@@ -10,7 +10,6 @@ import { IUserAccountService } from 'src/modules/user-account/services/user-acco
 import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 import { IUserAccountRepository } from 'src/typeorm/repositories/abstractions/user-account.repository.interface';
 import { Like } from 'typeorm';
-import { scryptSync } from 'node:crypto';
 import { ERRORS_DICTIONARY } from 'src/shared/constants/error-dictionary.constaint';
 import { AccountInfoResponseDto } from 'src/modules/auth/dto/auth-response.dto';
 import * as bcrypt from 'bcrypt';
@@ -124,5 +123,32 @@ export class UserAccountService implements IUserAccountService {
     }
     const result = await this._userAccountRepository.delete(Account);
     return Results.success(result);
+  }
+
+  async findUserWithRelations(userId: number): Promise<Result<UserAccount>> {
+    const user = await this._userAccountRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect(
+        'user.subCategories',
+        'subCategory',
+        'subCategory.isDeleted = :isDeleted',
+        { isDeleted: false },
+      )
+      .leftJoinAndSelect(
+        'user.categories',
+        'category',
+        'category.isDeleted = :isDeleted',
+        { isDeleted: false },
+      )
+      .leftJoinAndSelect('user.tax', 'tax', 'tax.isDeleted = :isDeleted', {
+        isDeleted: false,
+      })
+      .where('user.id = :id', { id: userId })
+      .getOne();
+
+    delete user.isDeleted;
+    delete user.isLoggedIn;
+    delete user.password;
+    return Results.success(user);
   }
 }

@@ -1,9 +1,9 @@
 import { BaseEntity } from 'src/base/entities/base-entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToOne } from 'typeorm';
 import { UserAccount } from './user-account.entity';
 import { USER_ACTION_TYPE } from 'src/shared/constants/global.constants';
 
-@Entity({ name: 'user-action' })
+@Entity({ name: 'user_action' })
 // action example: rating, comment, like, view,...
 export class UserAction extends BaseEntity {
   @Column({
@@ -32,5 +32,6 @@ export class UserAction extends BaseEntity {
   value: number;
 
   @ManyToOne(() => UserAccount, (user) => user.id)
+  @JoinTable()
   user: UserAccount;
 }

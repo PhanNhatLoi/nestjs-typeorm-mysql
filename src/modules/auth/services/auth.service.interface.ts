@@ -8,6 +8,7 @@ import { SignUpDto } from '../dto/sign-up.dto';
 import { VerifyEmailDto } from '../dto/verify-email.dto';
 import { ForgetPasswordDto } from '../dto/forget-password.dto';
 import { ChangePasswordDto } from '../dto/change-password.dto';
+import { UpdateInformationDto } from '../dto/update-infor.dto';
 
 export abstract class IAuthService {
   abstract getAuthenticatedUser(
@@ -27,4 +28,8 @@ export abstract class IAuthService {
   abstract generateAccessToken(payload: TokenPayload): Promise<string>;
   abstract generateRefreshToken(payload: TokenPayload): Promise<string>;
   abstract logout(id: number): Promise<string>;
+  abstract updateInformation(
+    id: number,
+    payload: UpdateInformationDto,
+  ): Promise<AccountInfoResponseDto>;
 }

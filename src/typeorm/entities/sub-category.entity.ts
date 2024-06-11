@@ -3,7 +3,7 @@ import { Column, Entity, ManyToMany, ManyToOne } from 'typeorm';
 import { Category } from './category.entity';
 import { UserAccount } from './user-account.entity';
 
-@Entity({ name: 'sub-category' })
+@Entity({ name: 'sub_category' })
 export class SubCategory extends BaseEntity {
   // name of category
   @Column({
@@ -26,10 +26,12 @@ export class SubCategory extends BaseEntity {
   })
   imageUrl: string;
 
-  @ManyToOne(() => Category, (category) => category.id)
+  @ManyToOne(() => Category, (category) => category.children)
   parent: Category;
 
   // sub categories for filter
-  @ManyToMany(() => UserAccount, (user) => user.id, { nullable: true })
-  user: UserAccount[];
+  @ManyToMany(() => UserAccount, (user) => user.subCategories, {
+    nullable: true,
+  })
+  users: UserAccount[];
 }

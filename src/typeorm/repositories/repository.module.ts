@@ -13,6 +13,8 @@ import { Discount } from '../entities/discount.entity';
 import { DiscountRepository } from './discount.repository';
 import { Category } from '../entities/category.entity';
 import { SubCategory } from '../entities/sub-category.entity';
+import { CategoryRepository } from './category.repository';
+import { SubCategoryRepository } from './sub-category.repository';
 
 @Module({
   providers: [],
@@ -33,7 +35,7 @@ export class RepositoryModule {
         scope: Scope.REQUEST,
       },
       {
-        provide: 'ITaxInformationRepository',
+        provide: 'ITaxRepository',
         useClass: TaxRepository,
         scope: Scope.REQUEST,
       },
@@ -48,13 +50,13 @@ export class RepositoryModule {
         scope: Scope.REQUEST,
       },
       {
-        provide: 'ICategory',
-        useClass: Category,
+        provide: 'ICategoryRepository',
+        useClass: CategoryRepository,
         scope: Scope.REQUEST,
       },
       {
-        provide: 'ISubCategory',
-        useClass: SubCategory,
+        provide: 'ISubCategoryRepository',
+        useClass: SubCategoryRepository,
         scope: Scope.REQUEST,
       },
     ];

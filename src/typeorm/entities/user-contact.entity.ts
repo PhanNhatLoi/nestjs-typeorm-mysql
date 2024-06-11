@@ -1,8 +1,8 @@
 import { BaseEntity } from 'src/base/entities/base-entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToOne } from 'typeorm';
 import { UserAccount } from './user-account.entity';
 
-@Entity({ name: 'user-contact' })
+@Entity({ name: 'user_contact' })
 export class UserContact extends BaseEntity {
   @Column({
     default: '',
@@ -17,5 +17,6 @@ export class UserContact extends BaseEntity {
   phone: string;
 
   @ManyToOne(() => UserAccount, (user) => user.id)
+  @JoinTable()
   user: UserAccount;
 }

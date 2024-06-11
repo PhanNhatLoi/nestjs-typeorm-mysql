@@ -8,8 +8,10 @@ import { RepositoryModule } from 'src/typeorm/repositories/repository.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SendmailModule } from './modules/sendmail/sendmail.module';
-import { GenerateDbModule } from './modules/generate-db/generate-db.module';
 import { UploadFileModule } from './modules/upload-file/upload-file.module';
+import { CategoryModule } from './modules/category/category.module';
+import { SubCategoryModule } from './modules/sub-category/sub-category.module';
+import { UserTaxModule } from './modules/user-tax/user-tax.module';
 
 @Module({
   imports: [
@@ -24,8 +26,10 @@ import { UploadFileModule } from './modules/upload-file/upload-file.module';
     DbContextModule,
     AuthModule,
     SendmailModule,
-    GenerateDbModule,
     UploadFileModule,
+    CategoryModule,
+    SubCategoryModule,
+    UserTaxModule,
   ],
   controllers: [AppController],
   providers: [AppService],

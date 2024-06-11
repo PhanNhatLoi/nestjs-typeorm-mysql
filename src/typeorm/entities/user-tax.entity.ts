@@ -1,17 +1,18 @@
 import { BaseEntity } from 'src/base/entities/base-entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, OneToOne } from 'typeorm';
 import { UserAccount } from './user-account.entity';
-import { Category } from './category.entity';
 
-@Entity({ name: 'user-tax' })
+@Entity({ name: 'user_tax' })
 export class Tax extends BaseEntity {
   // user account id
-  @ManyToOne(() => UserAccount, (user) => user.id)
-  user: UserAccount;
+  @OneToOne(() => UserAccount, (user) => user.tax)
+  createdBy: UserAccount;
 
-  // business type id
-  @ManyToOne(() => Category, (category) => category.id)
-  businessType: Category;
+  @Column({
+    default: '',
+    name: 'BusinessType',
+  })
+  businessType: string;
   //address user register the tax
   @Column({
     default: '',
@@ -29,21 +30,22 @@ export class Tax extends BaseEntity {
   // tax code
   @Column({
     default: '',
+    // unique: true,
     name: 'TaxCode',
   })
   taxCode: string;
   // Photo of business license url public
   @Column({
     nullable: true,
-    default: '',
+    type: 'json',
     name: 'PhotoLicense',
   })
-  photoLicense: string;
+  photoLicense: string[];
   // Photo of business license url public
   @Column({
     nullable: true,
-    default: '',
+    type: 'json',
     name: 'PhotoCatholicCertificate',
   })
-  photoCatholic: string;
+  photoCatholic: string[];
 }
