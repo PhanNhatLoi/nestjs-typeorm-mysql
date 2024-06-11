@@ -5,7 +5,7 @@ import { IAuthService } from 'src/modules/auth/services/auth.service.interface';
 import { SignInDto } from 'src/modules/auth/dto/sign-in.dto';
 import { JwtRefreshTokenGuard } from 'src/modules/auth/guards/jwt-refresh-token.guard';
 import { LocalAuthGuard } from 'src/modules/auth/guards/local.guard';
-import { RolesGuard } from './guards/roles.guard';
+import { RolesGuard } from '@modules/auth/guards/roles.guard';
 import { USER_ROLE } from 'src/shared/constants/global.constants';
 import { Roles } from 'src/base/decorators/roles.decorator';
 

@@ -1,8 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseRepository } from 'src/base/repositories/base-repository';
 import { Repository } from 'typeorm';
-import { Category } from '../entities/category.entity';
-import { ICategoryRepository } from './abstractions/category.repository.interface';
+import { Category } from 'src/typeorm/entities/category.entity';
+import { ICategoryRepository } from 'src/typeorm/repositories/abstractions/category.repository.interface';
 
 export class CategoryRepository
   extends BaseRepository<Category>

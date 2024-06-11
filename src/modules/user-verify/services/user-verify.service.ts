@@ -3,10 +3,10 @@ import { Result } from 'src/base/response/result';
 import { Results } from 'src/base/response/result-builder';
 import { IUserVerifyService } from './user-verify.service.interface';
 import { IUserVerifyRepository } from 'src/typeorm/repositories/abstractions/user-verify.repository.interface';
-import { CreateOtpCodeDto } from '../dto/create-otp.dto';
+import { CreateOtpCodeDto } from '@modules/user-verify/dto/create-otp.dto';
 import { UserVerify } from 'src/typeorm/entities/user-verify.entity';
 import { IUserAccountService } from 'src/modules/user-account/services/user-account.service.interface';
-import { FilterOtpCodeDto } from '../dto/filter-otp.dto';
+import { FilterOtpCodeDto } from '@modules/user-verify/dto/filter-otp.dto';
 import { ERRORS_DICTIONARY } from 'src/shared/constants/error-dictionary.constaint';
 
 @Injectable()

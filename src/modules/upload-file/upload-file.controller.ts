@@ -10,9 +10,9 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { IUploadFileService } from './services/upload-file.service.interface';
+import { IUploadFileService } from '@modules/upload-file/services/upload-file.service.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { JwtAccessTokenGuard } from '../auth/guards/jwt-access-token.guard';
+import { JwtAccessTokenGuard } from '@modules/auth/guards/jwt-access-token.guard';
 import {
   multerConfig,
   multerOptions,

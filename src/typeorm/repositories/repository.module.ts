@@ -3,18 +3,18 @@ import { ConfigModuleOptions } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 import { UserAccountRepository } from 'src/typeorm/repositories/user-account.repository';
-import { UserVerify } from '../entities/user-verify.entity';
-import { UserVerifyRepository } from './user-verify.repository';
-import { TaxRepository } from './tax.repository';
-import { Tax } from '../entities/user-tax.entity';
-import { UserAction } from '../entities/user-action.entity';
-import { UserActionRepository } from './user-action.repository';
-import { Discount } from '../entities/discount.entity';
-import { DiscountRepository } from './discount.repository';
-import { Category } from '../entities/category.entity';
-import { SubCategory } from '../entities/sub-category.entity';
-import { CategoryRepository } from './category.repository';
-import { SubCategoryRepository } from './sub-category.repository';
+import { UserVerify } from 'src/typeorm/entities/user-verify.entity';
+import { UserVerifyRepository } from 'src/typeorm/repositories/user-verify.repository';
+import { TaxRepository } from 'src/typeorm/repositories/tax.repository';
+import { Tax } from 'src/typeorm/entities/user-tax.entity';
+import { UserAction } from 'src/typeorm/entities/user-action.entity';
+import { UserActionRepository } from 'src/typeorm/repositories/user-action.repository';
+import { Discount } from 'src/typeorm/entities/discount.entity';
+import { DiscountRepository } from 'src/typeorm/repositories/discount.repository';
+import { Category } from 'src/typeorm/entities/category.entity';
+import { SubCategory } from 'src/typeorm/entities/sub-category.entity';
+import { CategoryRepository } from 'src/typeorm/repositories/category.repository';
+import { SubCategoryRepository } from 'src/typeorm/repositories/sub-category.repository';
 
 @Module({
   providers: [],

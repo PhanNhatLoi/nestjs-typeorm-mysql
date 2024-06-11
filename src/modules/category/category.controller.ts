@@ -10,15 +10,15 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiParam, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { ICategoryService } from './services/category.service.interface';
-import { FilterCategoryDto } from './services/dto/filter-category.dto';
-import { CreateCategoryDto } from './services/dto/CreateCategory.dto';
+import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ICategoryService } from '@modules/category/services/category.service.interface';
+import { FilterCategoryDto } from '@modules/category/services/dto/filter-category.dto';
+import { CreateCategoryDto } from '@modules/category/services/dto/CreateCategory.dto';
 import { Roles } from 'src/base/decorators/roles.decorator';
-import { RolesGuard } from '../auth/guards/roles.guard';
+import { RolesGuard } from '@modules/auth/guards/roles.guard';
 import { USER_ROLE } from 'src/shared/constants/global.constants';
-import { JwtAccessTokenGuard } from '../auth/guards/jwt-access-token.guard';
-import { UpdateCategoryDto } from './services/dto/update-category.dto';
+import { JwtAccessTokenGuard } from '@modules/auth/guards/jwt-access-token.guard';
+import { UpdateCategoryDto } from '@modules/category/services/dto/update-category.dto';
 
 @Controller('category')
 @ApiTags('category')

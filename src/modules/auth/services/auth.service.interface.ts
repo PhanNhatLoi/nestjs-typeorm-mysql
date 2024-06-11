@@ -4,11 +4,11 @@ import {
 } from 'src/modules/auth/dto/auth-response.dto';
 import { TokenPayload } from 'src/modules/auth/interfaces/token.interface';
 import { UserAccount } from 'src/typeorm/entities/user-account.entity';
-import { SignUpDto } from '../dto/sign-up.dto';
-import { VerifyEmailDto } from '../dto/verify-email.dto';
-import { ForgetPasswordDto } from '../dto/forget-password.dto';
-import { ChangePasswordDto } from '../dto/change-password.dto';
-import { UpdateInformationDto } from '../dto/update-infor.dto';
+import { SignUpDto } from '@modules/auth/dto/sign-up.dto';
+import { VerifyEmailDto } from '@modules/auth/dto/verify-email.dto';
+import { ForgetPasswordDto } from '@modules/auth/dto/forget-password.dto';
+import { ChangePasswordDto } from '@modules/auth/dto/change-password.dto';
+import { UpdateInformationDto } from '@modules/auth/dto/update-infor.dto';
 
 export abstract class IAuthService {
   abstract getAuthenticatedUser(

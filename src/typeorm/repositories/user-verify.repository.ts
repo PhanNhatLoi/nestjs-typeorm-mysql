@@ -1,8 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseRepository } from 'src/base/repositories/base-repository';
-import { UserVerify } from '../entities/user-verify.entity';
+import { UserVerify } from 'src/typeorm/entities/user-verify.entity';
 import { Repository } from 'typeorm';
-import { IUserVerifyRepository } from './abstractions/user-verify.repository.interface';
+import { IUserVerifyRepository } from 'src/typeorm/repositories/abstractions/user-verify.repository.interface';
 
 export class UserVerifyRepository
   extends BaseRepository<UserVerify>
