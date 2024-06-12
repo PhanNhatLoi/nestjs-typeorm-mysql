@@ -42,7 +42,7 @@ export class CategoryService implements ICategoryService {
       createdDate: new Date(),
     });
 
-    return Results.success(result);
+    return Results.success((await this.get(result.id)).response);
   }
   async get(id: number): Promise<Result<Category>> {
     const result = await this._categoryRepository.findOneById(id);
