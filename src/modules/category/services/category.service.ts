@@ -84,7 +84,9 @@ export class CategoryService implements ICategoryService {
   async getPagination(
     filter: FilterCategoryDto,
   ): Promise<Result<PaginationResult<Category>>> {
-    const conditions = {} as any;
+    const conditions = {
+      isDeleted: false,
+    } as any;
     if (filter.name) {
       conditions.name = Like(`%${filter.name}%`);
     }
@@ -124,13 +126,12 @@ export class CategoryService implements ICategoryService {
       });
     }
 
-    const result = await this._categoryRepository.create({
+    await this._categoryRepository.save({
       ...category,
       ...payload,
       modifiedBy: user,
       modifiedDate: new Date(),
     });
-    await this._categoryRepository.save(result);
-    return Results.success(result);
+    return Results.success((await this.get(id)).response);
   }
 }

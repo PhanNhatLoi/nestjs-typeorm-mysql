@@ -20,11 +20,17 @@ export interface IBaseRepository<T> {
   findAll(options: FindManyOptions<T>): Promise<T[]>;
   delete(data: T): Promise<T>;
   findWithRelations(relations: FindManyOptions<T>): Promise<T[]>;
+  findOneWithRelations(relations: FindManyOptions<T>): Promise<T>;
   preload(entity: DeepPartial<T>): Promise<T>;
   getPagination(
     page: number,
     limit: number,
     query?: FindManyOptions<T>,
+    joinOptions?: {
+      alias: string;
+      innerJoinAndSelect?: any;
+      leftJoinAndSelect?: any;
+    },
   ): Promise<PaginationResult<T>>;
   update(
     condition: Record<string, any>,
