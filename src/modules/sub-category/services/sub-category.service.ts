@@ -51,7 +51,7 @@ export class SubCategoryService implements ISubCategoryService {
       modifiedDate: new Date(),
       createdDate: new Date(),
     });
-    return Results.success(result);
+    return Results.success((await this.get(result.id)).response);
   }
   async get(id: number): Promise<Result<SubCategory>> {
     const result = await this._subCategoryRepository.findOneWithRelations({
