@@ -27,7 +27,7 @@ export class SubCategoryController {
   // ==========
   // get detail
   // ==========
-  @Get(':id')
+  @Get('detail/:id')
   @ApiParam({
     name: 'id',
     description: 'The ID of the item to get detail',
