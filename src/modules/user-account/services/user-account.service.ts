@@ -9,10 +9,15 @@ import { UpdateUserAccountDto } from 'src/modules/user-account/dto/update-user-a
 import { IUserAccountService } from 'src/modules/user-account/services/user-account.service.interface';
 import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 import { IUserAccountRepository } from 'src/typeorm/repositories/abstractions/user-account.repository.interface';
-import { Like } from 'typeorm';
+import { FindOptionsOrder, FindOptionsWhere, In, Like } from 'typeorm';
 import { ERRORS_DICTIONARY } from 'src/shared/constants/error-dictionary.constaint';
 import { AccountInfoResponseDto } from 'src/modules/auth/dto/auth-response.dto';
 import * as bcrypt from 'bcrypt';
+import { USER_ROLE } from 'src/shared/constants/global.constants';
+import {
+  IJoinQuery,
+  INearby,
+} from 'src/base/repositories/base-repository.interface';
 
 export const saltOrRounds = 10;
 
@@ -65,16 +70,82 @@ export class UserAccountService implements IUserAccountService {
   async getPagination(
     filter: FilterUserAccountDto,
   ): Promise<Result<PaginationResult<UserAccount>>> {
-    const conditions = {} as any;
-    if (filter.name) {
-      conditions.AccountName = Like(`%${filter.name}%`);
+    //custom filter
+    const conditions = {
+      isDeleted: false,
+      role: In([USER_ROLE.USER, USER_ROLE.ENTERPRISE]),
+    } as FindOptionsWhere<UserAccount> & { nearby?: INearby };
+
+    const joinQuery: IJoinQuery[] = [];
+    if (filter.category) {
+      joinQuery.push({
+        queryString: 'categories.id = :id',
+        queryParams: { id: filter.category },
+      });
     }
+    if (filter['sub-category']) {
+      joinQuery.push({
+        queryString: 'subCategories.id = :id',
+        queryParams: { id: filter['sub-category'] },
+      });
+    }
+    if (filter.name) {
+      conditions.name = Like(`%${filter.name}%`);
+    }
+
+    //custom sort
+
+    let order: FindOptionsOrder<UserAccount>;
+    if (filter.orderBy) {
+      order = {};
+      const temp = filter.orderBy.split(',');
+      if (temp[1] && ['ACS', 'DESC'].includes(temp[1].toUpperCase()))
+        order[`user.${temp[0].trim()}`] = temp[1].toUpperCase().trim();
+    }
+
     const result = await this._userAccountRepository.getPagination(
       filter.page,
       filter.limit,
       {
         where: conditions,
-        order: filter.orderByQueryClause,
+        order: order,
+        nearby: filter.lat &&
+          filter.lng &&
+          filter.radius && {
+            lat: filter.lat,
+            lng: filter.lng,
+            radius: filter.radius,
+          },
+        select: [
+          'id',
+          'createdDate',
+          'email',
+          'phone',
+          'address',
+          'job',
+          'role',
+          'profileImage',
+          'bannerMedia',
+          'referralID',
+          'emailVerified',
+          'name',
+          'websiteURL',
+          'nationality',
+          'favoriteBibleWords',
+          'introduction',
+          'socialLinks',
+          'achievements',
+          'averageRating',
+          'location',
+        ],
+      },
+      {
+        alias: 'user',
+        leftJoinAndSelect: {
+          categories: 'user.categories',
+          subCategories: 'user.subCategories',
+        },
+        joinQuery: joinQuery,
       },
     );
     return Results.success(result);
@@ -127,6 +198,8 @@ export class UserAccountService implements IUserAccountService {
   async findUserWithRelations(userId: number): Promise<Result<UserAccount>> {
     const user = await this._userAccountRepository
       .createQueryBuilder('user')
+      .where('user.id = :id', { id: userId })
+      .andWhere('user.emailVerified = :emailVerified', { emailVerified: true })
       .leftJoinAndSelect(
         'user.subCategories',
         'subCategory',
@@ -142,12 +215,101 @@ export class UserAccountService implements IUserAccountService {
       .leftJoinAndSelect('user.tax', 'tax', 'tax.isDeleted = :isDeleted', {
         isDeleted: false,
       })
-      .where('user.id = :id', { id: userId })
       .getOne();
+
+    if (!user) {
+      throw new BadRequestException({
+        message: ERRORS_DICTIONARY.USER_NOT_FOUND,
+        details: 'User not found!!!',
+      });
+    }
+    if (user.isDeleted) {
+      throw new BadRequestException({
+        message: ERRORS_DICTIONARY.USER_DELETED,
+        details: 'User is deleted!!!',
+      });
+    }
 
     delete user.isDeleted;
     delete user.isLoggedIn;
     delete user.password;
     return Results.success(user);
+  }
+
+  async getUserNearby(
+    filter: FilterUserAccountDto,
+  ): Promise<Result<PaginationResult<UserAccount>>> {
+    //custom filter
+    const conditions = {
+      isDeleted: false,
+      role: In([USER_ROLE.USER, USER_ROLE.ENTERPRISE]),
+    } as FindOptionsWhere<UserAccount>;
+
+    const joinQuery: IJoinQuery[] = [];
+    if (filter.category) {
+      joinQuery.push({
+        queryString: 'categories.id = :id',
+        queryParams: { id: filter.category },
+      });
+    }
+    if (filter['sub-category']) {
+      joinQuery.push({
+        queryString: 'subCategories.id = :id',
+        queryParams: { id: filter['sub-category'] },
+      });
+    }
+    if (filter.name) {
+      conditions.name = Like(`%${filter.name}%`);
+    }
+
+    //custom sort
+
+    let order: FindOptionsOrder<UserAccount>;
+    if (filter.orderBy) {
+      order = {};
+      const temp = filter.orderBy.split(',');
+      if (temp[1] && ['ACS', 'DESC'].includes(temp[1].toUpperCase()))
+        order[`user.${temp[0].trim()}`] = temp[1].toUpperCase().trim();
+    }
+
+    const result = await this._userAccountRepository.getPagination(
+      filter.page,
+      filter.limit,
+      {
+        where: conditions,
+        order: order,
+        select: [
+          'id',
+          'createdDate',
+          'email',
+          'phone',
+          'address',
+          'job',
+          'role',
+          'profileImage',
+          'bannerMedia',
+          'referralID',
+          'emailVerified',
+          'name',
+          'websiteURL',
+          'nationality',
+          'favoriteBibleWords',
+          'introduction',
+          'socialLinks',
+          'achievements',
+          'averageRating',
+          'location',
+        ],
+      },
+      {
+        alias: 'user',
+        leftJoinAndSelect: {
+          categories: 'user.categories',
+          subCategories: 'user.subCategories',
+        },
+        joinQuery: joinQuery,
+      },
+    );
+    return Results.success(result);
   }
 }

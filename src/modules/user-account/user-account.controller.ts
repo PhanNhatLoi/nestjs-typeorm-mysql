@@ -15,8 +15,8 @@ import { UpdateUserAccountDto } from 'src/modules/user-account/dto/update-user-a
 import { IUserAccountService } from 'src/modules/user-account/services/user-account.service.interface';
 import { Response } from 'express';
 
+@Controller('user-account')
 @ApiTags('user-account')
-@Controller('/user-account')
 export class UserAccountController extends BaseController {
   constructor(private readonly _userAccountService: IUserAccountService) {
     super();

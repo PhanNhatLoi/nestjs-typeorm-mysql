@@ -10,6 +10,17 @@ import {
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
+export interface IJoinQuery {
+  queryString: string;
+  queryParams: {
+    [x: string]: any;
+  };
+}
+export interface INearby {
+  lat: number;
+  lng: number;
+  radius: number;
+}
 export interface IBaseRepository<T> {
   create(data: DeepPartial<T>): T;
   createMany(data: DeepPartial<T>[]): T[];
@@ -25,11 +36,15 @@ export interface IBaseRepository<T> {
   getPagination(
     page: number,
     limit: number,
-    query?: FindManyOptions<T>,
+    query?: FindManyOptions<T> & {
+      nearby?: INearby;
+      select?: string[];
+    },
     joinOptions?: {
       alias: string;
       innerJoinAndSelect?: any;
       leftJoinAndSelect?: any;
+      joinQuery?: IJoinQuery[];
     },
   ): Promise<PaginationResult<T>>;
   update(

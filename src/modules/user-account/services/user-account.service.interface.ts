@@ -21,4 +21,7 @@ export abstract class IUserAccountService {
   abstract delete(id: string): Promise<Result<UserAccount>>;
   abstract gets(): Promise<Result<UserAccount[]>>;
   abstract findUserWithRelations(id: number): Promise<Result<UserAccount>>;
+  abstract getUserNearby(
+    filter: FilterUserAccountDto,
+  ): Promise<Result<PaginationResult<UserAccount>>>;
 }

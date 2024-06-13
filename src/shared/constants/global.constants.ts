@@ -23,8 +23,16 @@ export enum CATEGORY_TYPE {
 
 export enum USER_ACTION_TYPE {
   VIEW = 'VIEW',
-  LIKE = 'LIKE',
+  FAVORITE = 'FAVORITE',
   COMMENT = 'COMMENT',
   VIEW_PAGE = 'VIEW_PAGE',
   RATE = 'RATE',
+  SHARE = 'SHARE',
+  SEARCH = 'SEARCH',
+}
+
+export enum CONTACT_STATUS {
+  WAITING = 'WAITING',
+  DONE = 'DONE',
+  REPLIED = 'REPLIED',
 }

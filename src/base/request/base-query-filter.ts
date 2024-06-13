@@ -1,5 +1,4 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Allow } from 'class-validator';
 
 export interface IBaseQueryFilter {
   page: number;
@@ -36,7 +35,7 @@ export class BaseQueryFilter implements IBaseQueryFilter {
 
   @ApiPropertyOptional({
     name: 'orderBy',
-    description: `fieldName:acs || desc \r\n
+    description: `fieldName,acs || desc \r\n
     Supports only one at the once time`,
   })
   orderBy?: string;

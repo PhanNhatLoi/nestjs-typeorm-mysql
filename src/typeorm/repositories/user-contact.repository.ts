@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { UserContact } from 'src/typeorm/entities/user-contact.entity';
 import { IUserContactRepository } from 'src/typeorm/repositories/abstractions/user-contact.repository.interface';
 
-export class TaxRepository
+export class UserContactRepository
   extends BaseRepository<UserContact>
   implements IUserContactRepository
 {

@@ -12,6 +12,9 @@ import { UploadFileModule } from '@modules/upload-file/upload-file.module';
 import { CategoryModule } from '@modules/category/category.module';
 import { SubCategoryModule } from '@modules/sub-category/sub-category.module';
 import { UserTaxModule } from '@modules/user-tax/user-tax.module';
+import { PartnerModule } from '@modules/partner/partner.module';
+import { UserActionModule } from '@modules/user-action/user-action.module';
+import { UserContactModule } from '@modules/user-contact/user-contact.module';
 
 @Module({
   imports: [
@@ -30,6 +33,9 @@ import { UserTaxModule } from '@modules/user-tax/user-tax.module';
     CategoryModule,
     SubCategoryModule,
     UserTaxModule,
+    PartnerModule,
+    UserActionModule,
+    UserContactModule,
   ],
   controllers: [AppController],
   providers: [AppService],
