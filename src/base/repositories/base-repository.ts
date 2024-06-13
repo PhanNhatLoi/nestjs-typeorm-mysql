@@ -83,6 +83,9 @@ export abstract class BaseRepository<T extends HasId>
   async findWithRelations(relations: FindManyOptions<T>): Promise<T[]> {
     return await this.repository.find(relations);
   }
+  async findOneWithRelations(relations: FindManyOptions<T>): Promise<T> {
+    return await this.repository.findOne(relations);
+  }
   async preload(entity: DeepPartial<T>): Promise<T> {
     return await this.repository.preload(entity);
   }
@@ -90,6 +93,11 @@ export abstract class BaseRepository<T extends HasId>
     page: number,
     limit: number,
     query?: FindManyOptions<T>,
+    joinOptions?: {
+      alias: string;
+      innerJoinAndSelect?: any;
+      leftJoinAndSelect?: any;
+    },
   ): Promise<PaginationResult<T>> {
     if (typeof limit === 'string') {
       limit = parseInt(limit);
@@ -101,18 +109,45 @@ export abstract class BaseRepository<T extends HasId>
 
     const take = limit;
     const skip = (page - 1) * limit;
-    const count = await this.repository.count(query);
+    // add relation ship
+    // create one query builder by joinOptions.alias
+    const queryBuilder = this.repository.createQueryBuilder(
+      joinOptions?.alias || 'entity',
+    );
+
+    // function for innerJoin
+    if (joinOptions?.innerJoinAndSelect) {
+      Object.keys(joinOptions.innerJoinAndSelect).forEach((key) => {
+        queryBuilder.innerJoinAndSelect(
+          joinOptions.innerJoinAndSelect[key],
+          key,
+        );
+      });
+    }
+
+    // function for leftJoin
+    if (joinOptions?.leftJoinAndSelect) {
+      Object.keys(joinOptions.leftJoinAndSelect).forEach((key) => {
+        queryBuilder.leftJoinAndSelect(joinOptions.leftJoinAndSelect[key], key);
+      });
+    }
+
+    if (query?.where) {
+      queryBuilder.where(query.where);
+    }
+    // add relation ship
+
+    // const count = await this.repository.count(query);
+    const count = await queryBuilder.getCount();
+
+    const data = await queryBuilder.take(take).skip(skip).getMany();
 
     const result = new PaginationResult<T>();
     result.meta.page = page;
     result.meta.limit = limit;
     result.meta.total = count;
     result.meta.pageCount = Math.ceil(result.meta.total / result.meta.limit);
-    result.data = await this.repository.find({
-      ...query,
-      take,
-      skip,
-    });
+    result.data = data;
 
     return result;
   }

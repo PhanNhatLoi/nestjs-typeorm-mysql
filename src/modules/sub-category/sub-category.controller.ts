@@ -11,23 +11,22 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
-import { ICategoryService } from '@modules/category/services/category.service.interface';
-import { FilterCategoryDto } from '@modules/category/services/dto/filter-category.dto';
-import { CreateCategoryDto } from '@modules/category/services/dto/CreateCategory.dto';
 import { Roles } from 'src/base/decorators/roles.decorator';
 import { RolesGuard } from '@modules/auth/guards/roles.guard';
 import { USER_ROLE } from 'src/shared/constants/global.constants';
 import { JwtAccessTokenGuard } from '@modules/auth/guards/jwt-access-token.guard';
-import { UpdateCategoryDto } from '@modules/category/services/dto/update-category.dto';
+import { ISubCategoryService } from './services/sub-category.service.interface';
+import { FilterSubCategoryDto } from './services/dto/filter-category.dto';
+import { CreateSubCategoryDto } from './services/dto/CreateCategory.dto';
+import { UpdateSubCategoryDto } from './services/dto/update-category.dto';
 
-@Controller('category')
-@ApiTags('category')
-export class CategoryController {
-  constructor(private readonly _categoryService: ICategoryService) {}
+@Controller('sub-category')
+@ApiTags('Sub Category')
+export class SubCategoryController {
+  constructor(private readonly _subCategoryService: ISubCategoryService) {}
   // ==========
   // get detail
   // ==========
-
   @Get('detail/:id')
   @ApiParam({
     name: 'id',
@@ -36,9 +35,8 @@ export class CategoryController {
   })
   async getDetail(@Param() params) {
     const { id } = params;
-    return await this._categoryService.get(id);
+    return await this._subCategoryService.get(id);
   }
-
   // ==========
   // get detail
   // ==========
@@ -48,8 +46,14 @@ export class CategoryController {
   // ==========
 
   @Get('list')
-  async getList(@Query() pageOptionsDto: FilterCategoryDto) {
-    return await this._categoryService.getPagination(pageOptionsDto);
+  @ApiParam({
+    name: 'parentId',
+    description: 'The parentId of the category',
+    type: Number, // or Number, depending on your ID type
+    required: false,
+  })
+  async getList(@Query() pageOptionsDto: FilterSubCategoryDto) {
+    return await this._subCategoryService.getPagination(pageOptionsDto);
   }
 
   // ==========
@@ -57,14 +61,14 @@ export class CategoryController {
   // ==========
 
   // ==========
-  // get all list category
+  // get all list sub category
   // ==========
   @Get('all')
   async getAll() {
-    return await this._categoryService.gets();
+    return await this._subCategoryService.gets();
   }
   // ==========
-  // get all list category
+  // get all list sub category
   // ==========
 
   // ==========
@@ -73,21 +77,22 @@ export class CategoryController {
   @UseGuards(JwtAccessTokenGuard, RolesGuard)
   @Roles(USER_ROLE.SUPPER_ADMIN)
   @ApiBody({
-    type: CreateCategoryDto,
+    type: CreateSubCategoryDto,
     examples: {
       user: {
         value: {
           name: 'Thương mại',
           description: 'Dịch vụ thương mại',
           imageUrl: 'default-url.png',
-        } as CreateCategoryDto,
+          category: 1,
+        } as CreateSubCategoryDto,
       },
     },
   })
   @Post()
-  async addCategory(@Body() payload: CreateCategoryDto, @Req() req) {
+  async addSubCategory(@Body() payload: CreateSubCategoryDto, @Req() req) {
     const { user } = req;
-    return await this._categoryService.create(user, payload);
+    return await this._subCategoryService.create(user, payload);
   }
   // ==========
   // create category
@@ -105,9 +110,9 @@ export class CategoryController {
     type: Number, // or Number, depending on your ID type
   })
   @Delete(':id')
-  async removeCategory(@Param() params) {
+  async removeSubCategory(@Param() params) {
     const { id } = params;
-    return await this._categoryService.delete(id);
+    return await this._subCategoryService.delete(id);
   }
   // ==========
   // delete category
@@ -119,14 +124,15 @@ export class CategoryController {
   @UseGuards(JwtAccessTokenGuard, RolesGuard)
   @Roles(USER_ROLE.SUPPER_ADMIN)
   @ApiBody({
-    type: UpdateCategoryDto,
+    type: UpdateSubCategoryDto,
     examples: {
       user: {
         value: {
           name: 'Thương mại',
           description: 'Dịch vụ thương mại',
           imageUrl: 'default-url.png',
-        } as UpdateCategoryDto,
+          category: 1,
+        } as UpdateSubCategoryDto,
       },
     },
   })
@@ -137,13 +143,13 @@ export class CategoryController {
   })
   @Put(':id')
   async updateCategory(
-    @Body() payload: UpdateCategoryDto,
+    @Body() payload: UpdateSubCategoryDto,
     @Param() params,
     @Req() req,
   ) {
     const { id } = params;
     const { user } = req;
-    return await this._categoryService.update(user, id, payload);
+    return await this._subCategoryService.update(user, id, payload);
   }
   // ==========
   // update category

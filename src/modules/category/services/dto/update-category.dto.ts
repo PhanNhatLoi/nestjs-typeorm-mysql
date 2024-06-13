@@ -11,7 +11,7 @@ export class UpdateCategoryDto {
   @IsOptional()
   imageUrl: string;
   @IsEmpty()
-  isDeleted;
+  isDeleted?;
   @IsEmpty()
-  id;
+  id?;
 }
