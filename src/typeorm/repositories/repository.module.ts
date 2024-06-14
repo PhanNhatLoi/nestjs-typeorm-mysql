@@ -15,6 +15,8 @@ import { Category } from 'src/typeorm/entities/category.entity';
 import { SubCategory } from 'src/typeorm/entities/sub-category.entity';
 import { CategoryRepository } from 'src/typeorm/repositories/category.repository';
 import { SubCategoryRepository } from 'src/typeorm/repositories/sub-category.repository';
+import { UserContact } from '../entities/user-contact.entity';
+import { UserContactRepository } from './user-contact.repository';
 
 @Module({
   providers: [],
@@ -59,6 +61,11 @@ export class RepositoryModule {
         useClass: SubCategoryRepository,
         scope: Scope.REQUEST,
       },
+      {
+        provide: 'IUserContactRepository',
+        useClass: UserContactRepository,
+        scope: Scope.REQUEST,
+      },
     ];
 
     const imports = [
@@ -71,6 +78,7 @@ export class RepositoryModule {
           Discount,
           Category,
           SubCategory,
+          UserContact,
         ],
         'identity',
       ),

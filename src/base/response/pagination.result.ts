@@ -1,6 +1,6 @@
 export class PaginationResult<T> {
   data: T[];
-  meta: PaginationMetaData = new PaginationMetaData();
+  pagination: PaginationMetaData = new PaginationMetaData();
 }
 
 class PaginationMetaData {

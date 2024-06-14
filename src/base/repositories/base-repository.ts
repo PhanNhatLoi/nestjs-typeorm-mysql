@@ -1,5 +1,9 @@
 import { DefaultFilterQueryable } from 'src/base/infrastructure/default-filter.queryable';
-import { IBaseRepository } from 'src/base/repositories/base-repository.interface';
+import {
+  IBaseRepository,
+  IJoinQuery,
+  INearby,
+} from 'src/base/repositories/base-repository.interface';
 import { PaginationResult } from 'src/base/response/pagination.result';
 import {
   DeepPartial,
@@ -92,11 +96,14 @@ export abstract class BaseRepository<T extends HasId>
   async getPagination(
     page: number,
     limit: number,
-    query?: FindManyOptions<T>,
+    query?: FindManyOptions<T> & {
+      nearby?: INearby;
+    },
     joinOptions?: {
       alias: string;
       innerJoinAndSelect?: any;
       leftJoinAndSelect?: any;
+      joinQuery?: IJoinQuery[];
     },
   ): Promise<PaginationResult<T>> {
     if (typeof limit === 'string') {
@@ -111,9 +118,32 @@ export abstract class BaseRepository<T extends HasId>
     const skip = (page - 1) * limit;
     // add relation ship
     // create one query builder by joinOptions.alias
-    const queryBuilder = this.repository.createQueryBuilder(
-      joinOptions?.alias || 'entity',
-    );
+    const nameAlias = joinOptions?.alias || 'entity';
+    const queryBuilder = this.repository.createQueryBuilder(nameAlias);
+    // queryBuilder.orderBy('user.name', 'DESC');
+    // default clear item have isDeleted = false
+    queryBuilder.where(`${nameAlias}.isDeleted = :isDeleted`, {
+      isDeleted: false,
+    });
+
+    // function special for query nearby
+    if (query?.nearby) {
+      const { lat, lng, radius } = query.nearby;
+      queryBuilder.andWhere(
+        `(6371 * acos(
+              cos(radians(:lat)) *
+              cos(radians(user.location->>'$.lat')) *
+              cos(radians(user.location->>'$.lng') - radians(:lng)) +
+              sin(radians(:lat)) *
+              sin(radians(user.location->>'$.lat'))
+            )) < :radius`,
+        { lat: lat, lng: lng, radius: radius },
+      );
+    }
+
+    if (query?.where) {
+      queryBuilder.andWhere(query.where);
+    }
 
     // function for innerJoin
     if (joinOptions?.innerJoinAndSelect) {
@@ -131,22 +161,41 @@ export abstract class BaseRepository<T extends HasId>
         queryBuilder.leftJoinAndSelect(joinOptions.leftJoinAndSelect[key], key);
       });
     }
-
-    if (query?.where) {
-      queryBuilder.where(query.where);
+    // any case special must be query table join
+    if (joinOptions?.joinQuery) {
+      joinOptions.joinQuery.forEach((item) => {
+        queryBuilder.andWhere(item.queryString, item.queryParams);
+      });
     }
-    // add relation ship
+    // select array filed want to show
+    if (query?.select) {
+      const querySelect = (query.select as string[]).map((item) => {
+        //case field in queryBuilder then ${aliasName}.[key] or full field is ${aliasName}
+        //case field of relation joinTable or joinColumn is ${relation abstract name}.[key] or full field is ${relation abstract name}
+        return item;
+      });
+      queryBuilder.select(querySelect);
+    }
 
-    // const count = await this.repository.count(query);
+    //orderBy [fieldName],[orderByType]
+    // orderByType : 'asc' | 'desc'
+    if (query?.order) {
+      Object.keys(query.order).forEach((item) => {
+        queryBuilder.addOrderBy(item, query.order[item]);
+      });
+    }
+
     const count = await queryBuilder.getCount();
 
     const data = await queryBuilder.take(take).skip(skip).getMany();
 
     const result = new PaginationResult<T>();
-    result.meta.page = page;
-    result.meta.limit = limit;
-    result.meta.total = count;
-    result.meta.pageCount = Math.ceil(result.meta.total / result.meta.limit);
+    result.pagination.page = page;
+    result.pagination.limit = limit;
+    result.pagination.total = count;
+    result.pagination.pageCount = Math.ceil(
+      result.pagination.total / result.pagination.limit,
+    );
     result.data = data;
 
     return result;

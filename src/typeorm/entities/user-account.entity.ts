@@ -2,10 +2,8 @@ import { USER_ROLE } from 'src/shared/constants/global.constants';
 import {
   Column,
   Entity,
-  JoinColumn,
   JoinTable,
   ManyToMany,
-  OneToMany,
   OneToOne,
   PrimaryColumn,
   PrimaryGeneratedColumn,
@@ -72,7 +70,7 @@ export class UserAccount {
   @Column({
     type: 'enum',
     enum: USER_ROLE,
-    default: USER_ROLE.USER,
+    default: USER_ROLE.ENTERPRISE,
   })
   role: USER_ROLE;
 
@@ -106,13 +104,13 @@ export class UserAccount {
   })
   emailVerified: boolean;
 
-  // company name
+  // company name or name with user
   @Column({
     default: '',
     nullable: true,
-    name: 'CompanyName',
+    name: 'Name',
   })
-  companyName: string;
+  name: string;
 
   // website url
   @Column({

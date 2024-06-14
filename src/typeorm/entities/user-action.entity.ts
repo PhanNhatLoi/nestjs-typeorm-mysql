@@ -1,5 +1,5 @@
 import { BaseEntity } from 'src/base/entities/base-entity';
-import { Column, Entity, JoinTable, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { UserAccount } from './user-account.entity';
 import { USER_ACTION_TYPE } from 'src/shared/constants/global.constants';
 
@@ -32,6 +32,10 @@ export class UserAction extends BaseEntity {
   value: number;
 
   @ManyToOne(() => UserAccount, (user) => user.id)
-  @JoinTable()
-  user: UserAccount;
+  @JoinColumn()
+  fromUser: UserAccount;
+
+  @ManyToOne(() => UserAccount, (user) => user.id)
+  @JoinColumn()
+  toUser: UserAccount;
 }
