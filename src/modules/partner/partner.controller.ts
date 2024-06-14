@@ -80,6 +80,25 @@ export class PartnerController extends BaseController {
   // list favorite partner
   // ==========
   // ==========
+  // list favorite partner
+  // ==========
+  @UseGuards(JwtAccessTokenGuard)
+  @Get('favorite')
+  async getMyFavorite(
+    @Query() pageOptionsDto: FilterUserActionDto,
+    @Req() req,
+  ) {
+    const { user } = req;
+    return await this._partnerService.getAction(
+      user.id,
+      pageOptionsDto,
+      USER_ACTION_TYPE.FAVORITE,
+    );
+  }
+  // ==========
+  // list favorite partner
+  // ==========
+  // ==========
   // favorite to partner
   // ==========
   @UseGuards(JwtAccessTokenGuard)
