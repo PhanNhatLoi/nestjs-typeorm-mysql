@@ -9,7 +9,10 @@ import { ERRORS_DICTIONARY } from 'src/shared/constants/error-dictionary.constai
 import { AccountInfoResponseDto } from 'src/modules/auth/dto/auth-response.dto';
 import { IPartnerService, OtherAction } from './partner.service.interface';
 import { IUserAccountService } from '@modules/user-account/services/user-account.service.interface';
-import { USER_ACTION_TYPE } from 'src/shared/constants/global.constants';
+import {
+  USER_ACTION_TYPE,
+  USER_ROLE,
+} from 'src/shared/constants/global.constants';
 import { UserAction } from 'src/typeorm/entities/user-action.entity';
 import { IUserActionService } from '@modules/user-action/services/user-action.service.interface';
 import { FilterUserActionDto } from '@modules/user-action/services/dto/filter-action.dto';
@@ -34,6 +37,12 @@ export class PartnerService implements IPartnerService {
   }
   async get(id: number): Promise<Result<AccountInfoResponseDto>> {
     const result = await this._userAccountService.findUserWithRelations(id);
+    if (result.response.role === USER_ROLE.SUPPER_ADMIN) {
+      throw new BadRequestException({
+        message: ERRORS_DICTIONARY.NOT_FOUND,
+        details: `Partner not found!!!`,
+      });
+    }
     delete result.response.password;
     delete result.response.isLoggedIn;
     delete result.response.isDeleted;
