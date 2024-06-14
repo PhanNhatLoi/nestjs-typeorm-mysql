@@ -70,7 +70,7 @@ export class UserAccount {
   @Column({
     type: 'enum',
     enum: USER_ROLE,
-    default: USER_ROLE.USER,
+    default: USER_ROLE.ENTERPRISE,
   })
   role: USER_ROLE;
 
