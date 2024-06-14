@@ -10,6 +10,7 @@ import { UpdateUserActionDto } from './dto/update-user-action.dto';
 import { FilterUserActionDto } from './dto/filter-action.dto';
 import { PaginationResult } from 'src/base/response/pagination.result';
 import { FindOptionsWhere } from 'typeorm';
+import { USER_ACTION_TYPE } from 'src/shared/constants/global.constants';
 
 @Injectable()
 export class UserActionService implements IUserActionService {
@@ -128,5 +129,30 @@ export class UserActionService implements IUserActionService {
       },
     );
     return Results.success(result);
+  }
+
+  async countByActionType(id: number): Promise<Result<any>> {
+    const queryBuilder = await this._userActionRepository
+      .createQueryBuilder('user_action')
+      .leftJoinAndSelect('user_action.toUser', 'toUser')
+      .where('toUser.id = :id', { id: id })
+      .andWhere('user_action.isDeleted = :isDeleted', { isDeleted: false })
+      .select(['user_action'])
+      .getMany();
+    let initResult = {};
+    Object.keys(USER_ACTION_TYPE).map((item) => {
+      initResult[item] = 0;
+    });
+
+    const groupedActions = queryBuilder.reduce((result, action) => {
+      const actionType = action.actionType;
+      if (!result[actionType]) {
+        result[actionType] = 0;
+      }
+      result[actionType] = result[actionType] + 1;
+      return result;
+    }, initResult);
+
+    return Results.success(groupedActions);
   }
 }
