@@ -48,8 +48,6 @@ export class SubCategoryService implements ISubCategoryService {
       ...payload,
       createdBy: user,
       parent: checkParent.response,
-      modifiedDate: new Date(),
-      createdDate: new Date(),
     });
     return Results.success((await this.get(result.id)).response);
   }

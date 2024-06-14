@@ -34,8 +34,6 @@ export class UserActionService implements IUserActionService {
   async create(payload: CreateUserActionDto): Promise<Result<UserAction>> {
     const result = await this._userActionRepository.save({
       ...payload,
-      createdDate: new Date(),
-      modifiedDate: new Date(),
       createdBy: payload.createdBy,
       modifiedBy: payload.createdBy,
     });

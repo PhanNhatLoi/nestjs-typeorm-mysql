@@ -41,14 +41,12 @@ export class UserVerifyService implements IUserVerifyService {
       // Update the existing OTP code
       otpCode.otp = payload.otp;
       otpCode.user = user.response;
-      otpCode.createdDate = dateNow;
       otpCode.expiresDate = new Date(dateNow.getTime() + 3 * 60000);
     } else {
       // Create a new OTP code
       otpCode = this._userVerifyRepository.create({
         otp: payload.otp,
         user: user.response,
-        createdDate: dateNow,
         expiresDate: new Date(dateNow.getTime() + 3 * 60000),
       });
     }

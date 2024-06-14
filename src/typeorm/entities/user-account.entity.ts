@@ -2,8 +2,10 @@ import { USER_ROLE } from 'src/shared/constants/global.constants';
 import {
   Column,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
+  OneToMany,
   OneToOne,
   PrimaryColumn,
   PrimaryGeneratedColumn,
@@ -11,6 +13,7 @@ import {
 import { Tax } from './user-tax.entity';
 import { SubCategory } from './sub-category.entity';
 import { Category } from './category.entity';
+import { Discount } from './discount.entity';
 
 @Entity({ name: 'user_account' })
 export class UserAccount {
@@ -20,7 +23,12 @@ export class UserAccount {
   })
   id: number;
 
-  @Column({ type: 'datetime', nullable: true, name: 'CreatedDate' })
+  @Column({
+    type: 'datetime',
+    nullable: true,
+    name: 'CreatedDate',
+    default: () => 'NOW()',
+  })
   createdDate: Date;
 
   @Column({ type: 'datetime', nullable: true, name: 'ModifiedDate' })
@@ -206,4 +214,9 @@ export class UserAccount {
     default: false,
   })
   isLoggedIn: boolean;
+
+  //list discount
+  @OneToMany(() => Discount, (discount) => discount.user)
+  @JoinColumn()
+  discounts: Discount[];
 }

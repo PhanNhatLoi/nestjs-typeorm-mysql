@@ -39,6 +39,7 @@ export interface IBaseRepository<T> {
     query?: FindManyOptions<T> & {
       nearby?: INearby;
       select?: string[];
+      random?: boolean;
     },
     joinOptions?: {
       alias: string;
