@@ -15,6 +15,8 @@ import { UserTaxModule } from '@modules/user-tax/user-tax.module';
 import { PartnerModule } from '@modules/partner/partner.module';
 import { UserActionModule } from '@modules/user-action/user-action.module';
 import { UserContactModule } from '@modules/user-contact/user-contact.module';
+import { LanguageModule } from '@modules/language/language.module';
+import { SettingsModule } from '@modules/settings/settings.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { UserContactModule } from '@modules/user-contact/user-contact.module';
     PartnerModule,
     UserActionModule,
     UserContactModule,
+    LanguageModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

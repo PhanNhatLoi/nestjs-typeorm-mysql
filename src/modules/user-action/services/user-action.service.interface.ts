@@ -1,7 +1,7 @@
 import { Result } from 'src/base/response/result';
 import { CreateUserActionDto } from './dto/create-user-action.dto';
 import { UserAction } from 'src/typeorm/entities/user-action.entity';
-import { FindOneOptions } from 'typeorm';
+import { FindOneOptions, FindOptionsWhere } from 'typeorm';
 import { UpdateUserActionDto } from './dto/update-user-action.dto';
 import { PaginationResult } from 'src/base/response/pagination.result';
 import { FilterUserActionDto } from './dto/filter-action.dto';
@@ -20,4 +20,8 @@ export abstract class IUserActionService {
   abstract getPagination(
     filter: FilterUserActionDto,
   ): Promise<Result<PaginationResult<UserAction>>>;
+  abstract countByActionType(
+    id: number,
+    params?: FindOptionsWhere<UserAction>,
+  ): Promise<Result<any>>;
 }

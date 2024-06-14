@@ -17,6 +17,8 @@ import { CategoryRepository } from 'src/typeorm/repositories/category.repository
 import { SubCategoryRepository } from 'src/typeorm/repositories/sub-category.repository';
 import { UserContact } from '../entities/user-contact.entity';
 import { UserContactRepository } from './user-contact.repository';
+import { LanguageRepository } from './language.repository';
+import { Language } from '../entities/language.entity';
 
 @Module({
   providers: [],
@@ -66,6 +68,11 @@ export class RepositoryModule {
         useClass: UserContactRepository,
         scope: Scope.REQUEST,
       },
+      {
+        provide: 'ILanguageRepository',
+        useClass: LanguageRepository,
+        scope: Scope.REQUEST,
+      },
     ];
 
     const imports = [
@@ -79,6 +86,7 @@ export class RepositoryModule {
           Category,
           SubCategory,
           UserContact,
+          Language,
         ],
         'identity',
       ),
