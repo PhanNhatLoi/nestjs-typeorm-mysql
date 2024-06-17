@@ -93,36 +93,29 @@ export const GLOBAL_CONFIG = () => ({
   },
 });
 
-export const multerConfig = {
-  storage: diskStorage({
-    destination: './files/images', // Directory where the files will be stored
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      const ext = extname(file.originalname);
-      cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
-    },
-  }),
+export const multerConfig = (dest: string) => {
+  return {
+    storage: diskStorage({
+      destination: `./files/${dest}`,
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const ext = extname(file.originalname);
+        cb(null, `${uniqueSuffix}-${file.mimetype.split('/')[0]}${ext}`);
+      },
+    }),
+  };
 };
 
-export const multerPrivateConfig = {
-  storage: diskStorage({
-    destination: './files/images/private',
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      const ext = extname(file.originalname);
-      cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+export const multerOptions = (props?: { fileSize?: number }) => {
+  return {
+    fileFilter: (req, file, cb) => {
+      if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
+        return cb(new BadRequestException('Unsupported file type'), false);
+      }
+      cb(null, true);
     },
-  }),
-};
-
-export const multerOptions = {
-  fileFilter: (req, file, cb) => {
-    if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-      return cb(new BadRequestException('Unsupported file type'), false);
-    }
-    cb(null, true);
-  },
-  limits: {
-    fileSize: 1024 * 1024 * 5, // 5 MB
-  },
+    limits: {
+      fileSize: 1024 * 1024 * (props?.fileSize || 1), // MB
+    },
+  };
 };
