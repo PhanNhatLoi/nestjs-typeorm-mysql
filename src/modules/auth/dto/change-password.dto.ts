@@ -19,5 +19,17 @@ export class ChangePasswordDto {
 
   @IsNotEmpty()
   @Length(6)
+  accessKey: string;
+}
+
+export class verifyChangePasswordDto {
+  @Column()
+  @IsNotEmpty()
+  @IsEmail()
+  @MaxLength(50)
+  email: string;
+
+  @IsNotEmpty()
+  @Length(6)
   otpCode: string;
 }

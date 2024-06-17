@@ -6,9 +6,12 @@ import { TokenPayload } from 'src/modules/auth/interfaces/token.interface';
 import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 import { SignUpDto } from '@modules/auth/dto/sign-up.dto';
 import { VerifyEmailDto } from '@modules/auth/dto/verify-email.dto';
-import { ForgetPasswordDto } from '@modules/auth/dto/forget-password.dto';
-import { ChangePasswordDto } from '@modules/auth/dto/change-password.dto';
+import {
+  ChangePasswordDto,
+  verifyChangePasswordDto,
+} from '@modules/auth/dto/change-password.dto';
 import { UpdateInformationDto } from '@modules/auth/dto/update-infor.dto';
+import { SendOtpDto } from '../dto/send-otp.dto';
 
 export abstract class IAuthService {
   abstract getAuthenticatedUser(
@@ -19,7 +22,10 @@ export abstract class IAuthService {
   abstract signIn(id: number): Promise<AuthResponseDto>;
   abstract verifyEmailSignUp(payload: VerifyEmailDto): Promise<String>;
   abstract signUp(user: SignUpDto): Promise<String>;
-  abstract forgetPassword(payload: ForgetPasswordDto): Promise<String>;
+  abstract sendOtp(
+    payload: SendOtpDto,
+    type: 'register' | 'resetPassword',
+  ): Promise<String>;
   abstract changePassword(payload: ChangePasswordDto): Promise<String>;
   abstract getUserIfRefreshTokenMatched(
     id: number,
@@ -32,4 +38,7 @@ export abstract class IAuthService {
     id: number,
     payload: UpdateInformationDto,
   ): Promise<AccountInfoResponseDto>;
+  abstract verifyChangePassword(
+    payload: verifyChangePasswordDto,
+  ): Promise<{ accessKey: string }>;
 }

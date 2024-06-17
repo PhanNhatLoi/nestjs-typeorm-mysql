@@ -18,4 +18,5 @@ export class CreateUserAccountDto {
     lng: number;
   };
   bannerMedia: string[];
+  favoriteBibleWords: any;
 }

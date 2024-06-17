@@ -1,6 +1,6 @@
 import { IsEmail, IsNotEmpty, MaxLength } from 'class-validator';
 import { Column } from 'typeorm';
-export class ForgetPasswordDto {
+export class SendOtpDto {
   @Column()
   @IsNotEmpty()
   @IsEmail()

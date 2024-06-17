@@ -73,6 +73,13 @@ export class UserAccount {
     name: 'Job',
   })
   job: string;
+  // gender of user
+  @Column({
+    nullable: true,
+    default: 'Male',
+    name: 'Gender',
+  })
+  gender: string;
 
   // role from USER_ROLE example user, supper_admin, ENTERPRISE,...
   @Column({
@@ -219,4 +226,11 @@ export class UserAccount {
   @OneToMany(() => Discount, (discount) => discount.user)
   @JoinColumn()
   discounts: Discount[];
+
+  @Column({
+    name: 'AccessKey',
+    nullable: true,
+    default: '',
+  })
+  accessKey: string;
 }

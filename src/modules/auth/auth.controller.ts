@@ -19,10 +19,13 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { USER_ROLE } from 'src/shared/constants/global.constants';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from 'src/base/decorators/roles.decorator';
-import { ForgetPasswordDto } from './dto/forget-password.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
+import {
+  ChangePasswordDto,
+  verifyChangePasswordDto,
+} from './dto/change-password.dto';
 import { UpdateInformationDto } from './dto/update-infor.dto';
 import { AccountInfoResponseDto } from './dto/auth-response.dto';
+import { SendOtpDto } from './dto/send-otp.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -222,12 +225,12 @@ export class AuthController {
 
   @Post('forget-password')
   @ApiBody({
-    type: ForgetPasswordDto,
+    type: SendOtpDto,
     examples: {
       user: {
         value: {
           email: 'exampleuser@myzens.net',
-        } as ForgetPasswordDto,
+        } as SendOtpDto,
       },
     },
   })
@@ -255,11 +258,90 @@ export class AuthController {
       },
     },
   })
-  async forgetPassword(@Body() payload: ForgetPasswordDto) {
-    return await this._authService.forgetPassword(payload);
+  async forgetPassword(@Body() payload: SendOtpDto) {
+    return await this._authService.sendOtp(payload, 'resetPassword');
   }
   // ==========
   // forget password
+  // ==========
+  // ==========
+  // resend otp
+  // ==========
+
+  @Post('resend-otp')
+  @ApiBody({
+    type: SendOtpDto,
+    examples: {
+      user: {
+        value: {
+          email: 'exampleuser@myzens.net',
+        } as SendOtpDto,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'User exits',
+    content: {
+      'application/json': {
+        example: {
+          statusCode: 400,
+          message: 'ATH_0091',
+          details: 'User exits!!!',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'success',
+    content: {
+      'application/json': {
+        example: {
+          message: 'An otp email has been sent to your email, please check',
+        },
+      },
+    },
+  })
+  async resendOtp(@Body() payload: SendOtpDto) {
+    return await this._authService.sendOtp(payload, 'register');
+  }
+  // ==========
+  // resend otp
+  // ==========
+
+  // ==========
+  // verify otp change password
+  // ==========
+
+  @Post('verify-change-password')
+  @ApiBody({
+    type: verifyChangePasswordDto,
+    examples: {
+      user: {
+        value: {
+          email: 'exampleuser@myzens.net',
+          otpCode: '111111',
+        } as verifyChangePasswordDto,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'success',
+    content: {
+      'application/json': {
+        example: {
+          message: 'An otp email has been sent to your email, please check',
+        },
+      },
+    },
+  })
+  async verifyChangePassword(@Body() payload: verifyChangePasswordDto) {
+    return await this._authService.verifyChangePassword(payload);
+  }
+  // ==========
+  // verify otp change password
   // ==========
 
   // ==========
@@ -274,7 +356,7 @@ export class AuthController {
         value: {
           email: 'exampleuser@myzens.net',
           newPassword: '12345678',
-          otpCode: '111111',
+          accessKey: 'QdEpwu',
         } as ChangePasswordDto,
       },
     },
