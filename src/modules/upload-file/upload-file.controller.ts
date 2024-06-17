@@ -13,46 +13,37 @@ import {
 import { IUploadFileService } from '@modules/upload-file/services/upload-file.service.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAccessTokenGuard } from '@modules/auth/guards/jwt-access-token.guard';
-import {
-  multerConfig,
-  multerOptions,
-  multerPrivateConfig,
-} from 'src/configs/configuration.config';
+import { multerConfig, multerOptions } from 'src/configs/configuration.config';
 import { join } from 'path';
 import { ApiTags } from '@nestjs/swagger';
 
 @Controller('file')
-@ApiTags('file-upload')
+@ApiTags('Upload file')
 export class UploadFileController {
   constructor(private readonly _fileService: IUploadFileService) {}
 
-  @Post('upload/image/public') // Endpoint for uploading files
+  @Post('upload/media')
   @UseGuards(JwtAccessTokenGuard)
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: multerConfig.storage,
-      fileFilter: multerOptions.fileFilter,
-      limits: multerOptions.limits,
+      storage: multerConfig('/media').storage,
+      limits: multerOptions({ fileSize: 25 }).limits,
     }),
   )
-  async uploadFile(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [new FileTypeValidator({ fileType: 'image/' })],
-      }),
-    )
+  async uploadMedia(
+    @UploadedFile()
     file: Express.Multer.File,
   ) {
     return await this._fileService.uploadFile(file);
   }
 
-  @Post('upload/image') // Endpoint for uploading files
+  @Post('private/image') // Endpoint for uploading files
   @UseGuards(JwtAccessTokenGuard)
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: multerPrivateConfig.storage,
-      fileFilter: multerOptions.fileFilter,
-      limits: multerOptions.limits,
+      storage: multerConfig('/images/private').storage,
+      fileFilter: multerOptions().fileFilter,
+      limits: multerOptions({ fileSize: 5 }).limits,
     }),
   )
   async uploadFilePrivate(
@@ -71,17 +62,17 @@ export class UploadFileController {
   async getFile(@Param('filename') filename: string, @Res() res) {
     const filePath = join(process.cwd(), 'files/images/private', filename);
     const fileExtension = filename.split('.').pop();
-    const contentType = `image/${fileExtension}`;
+    const contentType = fileExtension.replace('.', '/');
     res.setHeader('Content-Type', contentType);
     res.sendFile(filePath);
     return filePath;
   }
-  @Get('public-image/:filename')
+  @Get('media/:filename')
   @UseGuards(JwtAccessTokenGuard)
   async getFilePublic(@Param('filename') filename: string, @Res() res) {
-    const filePath = join(process.cwd(), 'files/images', filename);
-    const fileExtension = filename.split('.').pop();
-    const contentType = `image/${fileExtension}`;
+    const filePath = join(process.cwd(), 'files/media', filename);
+    const fileExtension = filename.split('-').pop();
+    const contentType = fileExtension.replace('.', '/');
     res.setHeader('Content-Type', contentType);
     res.sendFile(filePath);
     return filePath;
