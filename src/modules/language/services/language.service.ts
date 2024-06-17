@@ -58,8 +58,6 @@ export class LanguageService implements ILanguageService {
     const result = await this._languageRepository.save({
       dataSource: {},
       ...payload,
-      createdDate: new Date(),
-      modifiedDate: new Date(),
       createdBy: user,
       modifiedBy: user,
     });

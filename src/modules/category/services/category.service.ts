@@ -38,8 +38,6 @@ export class CategoryService implements ICategoryService {
       ...payload,
       createdBy: user,
       modifiedBy: user,
-      modifiedDate: new Date(),
-      createdDate: new Date(),
     });
 
     return Results.success((await this.get(result.id)).response);

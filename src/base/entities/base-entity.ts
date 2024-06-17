@@ -14,14 +14,24 @@ export abstract class BaseEntity {
   })
   id: number;
 
-  @Column({ type: 'datetime', nullable: true, name: 'CreatedDate' })
+  @Column({
+    type: 'datetime',
+    nullable: true,
+    name: 'CreatedDate',
+    default: () => 'NOW()',
+  })
   createdDate: Date;
 
   @ManyToOne(() => UserAccount, (user) => user.id)
   @JoinColumn()
   createdBy: UserAccount;
 
-  @Column({ type: 'datetime', nullable: true, name: 'ModifiedDate' })
+  @Column({
+    type: 'datetime',
+    nullable: true,
+    name: 'ModifiedDate',
+    default: () => 'NOW()',
+  })
   modifiedDate: Date;
 
   @ManyToOne(() => UserAccount, (user) => user.id)

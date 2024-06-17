@@ -16,20 +16,8 @@ export class UserTaxService implements IUserTaxService {
     private readonly _taxRepository: ITaxRepository,
   ) {}
   async create(payload: CreateUserTaxDto): Promise<Result<Tax>> {
-    // const checkUnique = await this._taxRepository.findOneByConditions({
-    //   where: {
-    //     taxCode: payload.taxCode,
-    //   },
-    // });
-    // if (checkUnique) {
-    //   throw new BadRequestException({
-    //     message: ERRORS_DICTIONARY.ALREADY_EXISTS,
-    //     details: 'TaxCode exits!!!',
-    //   });
-    // }
     const result = await this._taxRepository.create({
       ...payload,
-      createdDate: new Date(),
     });
     const newTax = await this._taxRepository.save(result);
     return Results.success(newTax);

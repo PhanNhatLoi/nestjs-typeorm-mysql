@@ -26,8 +26,6 @@ export class UserContactService implements IUserContactService {
   ): Promise<Result<UserContact>> {
     const result = await this._userContactRepository.save({
       ...payload,
-      createdDate: new Date(),
-      modifiedDate: new Date(),
       createdBy: createdBy,
       modifiedBy: createdBy,
     });

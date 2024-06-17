@@ -1,5 +1,6 @@
 import { BaseEntity } from 'src/base/entities/base-entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { UserAccount } from './user-account.entity';
 
 @Entity({ name: 'discount' })
 export class Discount extends BaseEntity {
@@ -8,7 +9,7 @@ export class Discount extends BaseEntity {
     default: '',
     name: 'title',
   })
-  name: string;
+  title: string;
 
   // short description
   @Column({
@@ -24,5 +25,23 @@ export class Discount extends BaseEntity {
   })
   imageUrl: string;
 
+  @Column({
+    nullable: true,
+    type: 'datetime',
+    name: 'ExpiresTime',
+  })
+  expiresTime: Date;
+
+  @Column({
+    nullable: true,
+    type: 'datetime',
+    name: 'StartDate',
+    default: () => 'NOW()',
+  })
+  startDate: Date;
+
+  @ManyToOne(() => UserAccount, (user) => user.discounts)
+  @JoinColumn()
+  user: UserAccount;
   /// todo add some field after
 }

@@ -98,6 +98,7 @@ export abstract class BaseRepository<T extends HasId>
     limit: number,
     query?: FindManyOptions<T> & {
       nearby?: INearby;
+      random?: boolean;
     },
     joinOptions?: {
       alias: string;
@@ -185,8 +186,12 @@ export abstract class BaseRepository<T extends HasId>
       });
     }
 
-    const count = await queryBuilder.getCount();
+    //random item
+    if (query.random) {
+      queryBuilder.addOrderBy('RAND()');
+    }
 
+    const count = await queryBuilder.getCount();
     const data = await queryBuilder.take(take).skip(skip).getMany();
 
     const result = new PaginationResult<T>();

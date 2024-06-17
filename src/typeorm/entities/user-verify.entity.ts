@@ -21,6 +21,7 @@ export class UserVerify {
   @Column({
     type: 'datetime',
     name: 'CreatedDate',
+    default: () => 'NOW()',
   })
   createdDate: Date;
 

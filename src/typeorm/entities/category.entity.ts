@@ -32,5 +32,5 @@ export class Category extends BaseEntity {
   users: UserAccount[];
 
   @OneToMany(() => SubCategory, (subCategory) => subCategory.parent)
-  children: SubCategory;
+  children: SubCategory[];
 }
