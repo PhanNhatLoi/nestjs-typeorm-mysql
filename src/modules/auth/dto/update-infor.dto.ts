@@ -75,9 +75,9 @@ export class UpdateInformationDto {
   @IsString()
   @IsOptional()
   profileImage: string;
-  @IsString()
+  @IsArray()
   @IsOptional()
-  bannerMedia: string;
+  bannerMedia: string[];
   @IsString()
   @IsOptional()
   companyName: string;

@@ -26,15 +26,18 @@ import { SignUpTemplate } from 'src/modules/sendmail/template/signUp-html';
 import { IUserVerifyService } from 'src/modules/user-verify/services/user-verify.service.interface';
 import { VerifyEmailDto } from '@modules/auth/dto/verify-email.dto';
 import { USER_ROLE } from 'src/shared/constants/global.constants';
-import { ForgetPasswordDto } from '@modules/auth/dto/forget-password.dto';
 import { ForgotTemplate } from 'src/modules/sendmail/template/fogotpassword-html';
-import { ChangePasswordDto } from '@modules/auth/dto/change-password.dto';
+import {
+  ChangePasswordDto,
+  verifyChangePasswordDto,
+} from '@modules/auth/dto/change-password.dto';
 import * as bcrypt from 'bcrypt';
 import { saltOrRounds } from 'src/modules/user-account/services/user-account.service';
 import { UpdateInformationDto } from '@modules/auth/dto/update-infor.dto';
 import { ICategoryService } from 'src/modules/category/services/category.service.interface';
 import { ISubCategoryService } from 'src/modules/sub-category/services/sub-category.service.interface';
 import { IUserTaxService } from 'src/modules/user-tax/services/user-tax.service.interface';
+import { SendOtpDto } from '../dto/send-otp.dto';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -76,6 +79,7 @@ export class AuthService implements IAuthService {
       const userAccount = await this._userAccountService.findParams([
         {
           email: userDto.email,
+          emailVerified: true,
         },
       ]);
 
@@ -105,6 +109,7 @@ export class AuthService implements IAuthService {
             lng: 0,
           },
           bannerMedia: [],
+          favoriteBibleWords: {},
         });
       }
 
@@ -276,7 +281,10 @@ export class AuthService implements IAuthService {
     );
   }
 
-  async forgetPassword(payload: ForgetPasswordDto): Promise<String> {
+  async sendOtp(
+    payload: SendOtpDto,
+    type: 'register' | 'resetPassword',
+  ): Promise<String> {
     try {
       const userAccount = await this._userAccountService.findParams({
         email: payload.email,
@@ -293,7 +301,8 @@ export class AuthService implements IAuthService {
       }
 
       const newCode = Math.floor(100000 + Math.random() * 900000).toString(); //generate code 6 digit
-      const htmlTemplate = ForgotTemplate(newCode);
+      const htmlTemplate =
+        type === 'register' ? SignUpTemplate(newCode) : ForgotTemplate(newCode);
       await this.sendMailService.sendmail({
         sendTo: payload.email,
         subject: '<noreply> This is email verify Email forgotPassword',
@@ -321,28 +330,10 @@ export class AuthService implements IAuthService {
         details: 'User not found!!',
       });
     }
-
-    const otpCode = await this._userVerifyService.get({
-      user: {
-        email: payload.email,
-      },
-      otp: payload.otpCode,
-    });
-
-    if (!otpCode.response) {
+    if (userAccount.response.accessKey !== payload.accessKey) {
       throw new BadRequestException({
-        message: ERRORS_DICTIONARY.WRONG_CREDENTIALS,
-        details: 'Otp wrong!!',
-      });
-    }
-
-    if (
-      !otpCode.response.expiresDate ||
-      new Date(otpCode.response.expiresDate).getTime() < new Date().getTime()
-    ) {
-      throw new BadRequestException({
-        message: ERRORS_DICTIONARY.VALIDATION_ERROR,
-        details: 'Otp exp!!',
+        message: ERRORS_DICTIONARY.USER_NOT_FOUND,
+        details: 'accessKey Wrong!!',
       });
     }
 
@@ -352,6 +343,7 @@ export class AuthService implements IAuthService {
     );
     await this._userAccountService.update(userAccount.response.id, {
       password: newPasswordHash,
+      accessKey: '',
     });
 
     return 'Change password successfully';
@@ -413,4 +405,58 @@ export class AuthService implements IAuthService {
       throw error;
     }
   }
+  async verifyChangePassword(
+    payload: verifyChangePasswordDto,
+  ): Promise<{ accessKey: string }> {
+    const userAccount = await this._userAccountService.findParams({
+      email: payload.email,
+    });
+
+    if (!userAccount.response) {
+      throw new BadRequestException({
+        message: ERRORS_DICTIONARY.USER_NOT_FOUND,
+        details: 'Email account not found!!',
+      });
+    }
+    const otpCode = await this._userVerifyService.get({
+      user: {
+        email: userAccount.response.email,
+      },
+      otp: payload.otpCode,
+    });
+
+    if (!otpCode.response) {
+      throw new BadRequestException({
+        message: ERRORS_DICTIONARY.WRONG_CREDENTIALS,
+        details: 'Otp wrong!!',
+      });
+    }
+
+    if (
+      !otpCode.response.expiresDate ||
+      new Date(otpCode.response.expiresDate).getTime() < new Date().getTime()
+    ) {
+      throw new BadRequestException({
+        message: ERRORS_DICTIONARY.VALIDATION_ERROR,
+        details: 'Otp exp!!',
+      });
+    }
+    const accessKey = this.generateString(6);
+    await this._userAccountService.update(userAccount.response.id, {
+      accessKey: accessKey,
+    });
+    await this._userVerifyService.delete(otpCode.response.id);
+    return { accessKey: accessKey };
+  }
+  generateString = (length) => {
+    const characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+
+    return result;
+  };
 }
