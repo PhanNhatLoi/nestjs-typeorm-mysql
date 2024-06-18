@@ -42,7 +42,7 @@ export class UserAccountService implements IUserAccountService {
         email: payload.email,
       },
     });
-    if (checkUnique.emailVerified) {
+    if (checkUnique?.emailVerified) {
       throw new BadRequestException({
         message: ERRORS_DICTIONARY.USER_EXISTED,
         details: 'User exits!!!',
@@ -53,7 +53,7 @@ export class UserAccountService implements IUserAccountService {
 
     const newAccount = {
       ...payload,
-      id: checkUnique.id || undefined,
+      id: checkUnique?.id || undefined,
       password: passwordHash,
       createdBy: 0,
       modifiedBy: 0,

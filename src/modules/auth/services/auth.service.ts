@@ -76,12 +76,10 @@ export class AuthService implements IAuthService {
 
   async signUp(userDto: SignUpDto): Promise<String> {
     try {
-      const userAccount = await this._userAccountService.findParams([
-        {
-          email: userDto.email,
-          emailVerified: true,
-        },
-      ]);
+      const userAccount = await this._userAccountService.findParams({
+        email: userDto.email,
+        emailVerified: true,
+      });
 
       if (userAccount.response) {
         throw new BadRequestException({
