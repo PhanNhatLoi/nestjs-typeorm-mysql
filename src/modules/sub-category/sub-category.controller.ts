@@ -46,12 +46,6 @@ export class SubCategoryController {
   // ==========
 
   @Get('list')
-  @ApiParam({
-    name: 'parentId',
-    description: 'The parentId of the category',
-    type: Number, // or Number, depending on your ID type
-    required: false,
-  })
   async getList(@Query() pageOptionsDto: FilterSubCategoryDto) {
     return await this._subCategoryService.getPagination(pageOptionsDto);
   }

@@ -64,7 +64,7 @@ export class UpdateInformationDto {
   //values invalid
 
   @IsOptional()
-  @IsPhoneNumber('VI')
+  @IsPhoneNumber()
   phone: string;
   @IsString()
   @IsOptional()

@@ -95,6 +95,12 @@ export class CategoryService implements ICategoryService {
         where: conditions,
         order: filter.orderByQueryClause,
       },
+      {
+        alias: 'category',
+        leftJoinAndSelect: {
+          categories: 'category.children',
+        },
+      },
     );
     return Results.success(result);
   }

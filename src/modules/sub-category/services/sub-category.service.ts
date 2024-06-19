@@ -106,7 +106,7 @@ export class SubCategoryService implements ISubCategoryService {
     }
     if (filter.category) {
       conditions.parent = {
-        id: filter.category,
+        id: In(filter.category.split(',')),
       };
     }
     const result = await this._subCategoryRepository.getPagination(
