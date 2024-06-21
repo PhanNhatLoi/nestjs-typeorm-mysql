@@ -67,8 +67,6 @@ export class UpdateInformationDto {
   @IsPhoneNumber()
   phone: string;
   @IsString()
-  @IsOptional()
-  address: string;
   @IsString()
   @IsOptional()
   job: string;
@@ -127,6 +125,10 @@ export class UpdateInformationDto {
   @IsArray()
   @Type(() => Number)
   categories: number[];
+  userAddress: {
+    address: string;
+    wardId: number;
+  };
   // ...field
 }
 

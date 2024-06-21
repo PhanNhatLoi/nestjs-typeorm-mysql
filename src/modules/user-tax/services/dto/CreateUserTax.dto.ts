@@ -4,7 +4,6 @@ import { DeepPartial } from 'typeorm';
 
 export class CreateUserTaxDto {
   businessType: string;
-  address: string;
   email?: string;
   taxCode: string;
   photoLicense: string[];

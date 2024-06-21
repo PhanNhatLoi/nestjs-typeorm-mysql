@@ -5,6 +5,7 @@ import {
   JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryColumn,
@@ -14,6 +15,7 @@ import { Tax } from './user-tax.entity';
 import { SubCategory } from './sub-category.entity';
 import { Category } from './category.entity';
 import { Discount } from './discount.entity';
+import { UserAddress } from './user-address.entity';
 
 @Entity({ name: 'user_account' })
 export class UserAccount {
@@ -57,14 +59,6 @@ export class UserAccount {
     default: '',
   })
   password: string;
-
-  // address
-  @Column({
-    nullable: true,
-    default: '',
-    name: 'Address',
-  })
-  address: string;
 
   // job of user
   @Column({
@@ -233,4 +227,8 @@ export class UserAccount {
     default: '',
   })
   accessKey: string;
+
+  //address
+  @OneToOne(() => UserAddress, (address) => address.createdBy)
+  userAddress: UserAddress;
 }

@@ -1,10 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { IUserTaxService } from './user-tax.service.interface';
 import { Result } from 'src/base/response/result';
 import { Tax } from 'src/typeorm/entities/user-tax.entity';
 import { Results } from 'src/base/response/result-builder';
 import { CreateUserTaxDto, UpdateUserTaxDto } from './dto/CreateUserTax.dto';
-import { ERRORS_DICTIONARY } from 'src/shared/constants/error-dictionary.constaint';
 import { DefaultFilterQueryable } from 'src/base/infrastructure/default-filter.queryable';
 import { In } from 'typeorm';
 import { ITaxRepository } from 'src/typeorm/repositories/abstractions/tax.repository.interface';

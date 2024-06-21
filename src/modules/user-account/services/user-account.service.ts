@@ -29,7 +29,7 @@ export class UserAccountService implements IUserAccountService {
   ) {}
   async gets(): Promise<Result<UserAccount[]>> {
     const result = await this._userAccountRepository.findAll({
-      where: { ...DefaultFilterQueryable },
+      where: { ...DefaultFilterQueryable, emailVerified: true },
     });
     return Results.success(result);
   }
@@ -72,6 +72,7 @@ export class UserAccountService implements IUserAccountService {
     //custom filter
     const conditions = {
       isDeleted: false,
+      emailVerified: true,
       role: In([USER_ROLE.USER, USER_ROLE.ENTERPRISE]),
     } as FindOptionsWhere<UserAccount> & { nearby?: INearby };
 
@@ -81,13 +82,41 @@ export class UserAccountService implements IUserAccountService {
         queryString: 'categories.id = :id',
         queryParams: { id: filter.category },
       });
+      joinQuery.push({
+        queryString: 'categories.isDeleted = :isDeleted',
+        queryParams: { isDeleted: false },
+      });
     }
     if (filter['sub-category']) {
       joinQuery.push({
         queryString: 'subCategories.id = :id',
         queryParams: { id: filter['sub-category'] },
       });
+      joinQuery.push({
+        queryString: 'subCategories.isDeleted = :isDeleted',
+        queryParams: { isDeleted: false },
+      });
     }
+
+    if (filter.province) {
+      joinQuery.push({
+        queryString: 'province.id = :id',
+        queryParams: { id: filter.province },
+      });
+    }
+    if (filter.district) {
+      joinQuery.push({
+        queryString: 'district.id = :id',
+        queryParams: { id: filter.district },
+      });
+    }
+    if (filter.ward) {
+      joinQuery.push({
+        queryString: 'ward.id = :id',
+        queryParams: { id: filter.ward },
+      });
+    }
+
     if (filter.name) {
       conditions.name = Like(`%${filter.name}%`);
     }
@@ -120,7 +149,6 @@ export class UserAccountService implements IUserAccountService {
           'user.createdDate',
           'user.email',
           'user.phone',
-          'user.address',
           'user.job',
           'user.role',
           'user.profileImage',
@@ -136,6 +164,15 @@ export class UserAccountService implements IUserAccountService {
           'user.achievements',
           'user.averageRating',
           'user.location',
+          'categories',
+          'subCategories',
+          'address',
+          'ward.name',
+          'ward.id',
+          'district.name',
+          'district.id',
+          'province.name',
+          'province.id',
         ],
       },
       {
@@ -143,6 +180,10 @@ export class UserAccountService implements IUserAccountService {
         leftJoinAndSelect: {
           categories: 'user.categories',
           subCategories: 'user.subCategories',
+          address: 'user.userAddress',
+          ward: 'address.ward',
+          district: 'ward.district',
+          province: 'district.province',
         },
         joinQuery: joinQuery,
       },
@@ -214,6 +255,55 @@ export class UserAccountService implements IUserAccountService {
       .leftJoinAndSelect('user.tax', 'tax', 'tax.isDeleted = :isDeleted', {
         isDeleted: false,
       })
+      .leftJoinAndSelect(
+        'user.userAddress',
+        'userAddress',
+        'userAddress.isDeleted = :isDeleted',
+        {
+          isDeleted: false,
+        },
+      )
+      .leftJoinAndSelect('userAddress.ward', 'ward')
+      .leftJoinAndSelect('ward.district', 'district')
+      .leftJoinAndSelect('district.province', 'province')
+      .leftJoinAndSelect(
+        'userAddress.ward',
+        'wardAddress',
+        'ward.isDeleted = :isDeleted AND district.isDeleted = :isDeleted AND province.isDeleted = :isDeleted',
+        {
+          isDeleted: false,
+        },
+      )
+      .leftJoinAndSelect(
+        'wardAddress.district',
+        'districtAddress',
+        'district.isDeleted = :isDeleted AND province.isDeleted = :isDeleted',
+        {
+          isDeleted: false,
+        },
+      )
+      .leftJoinAndSelect(
+        'districtAddress.province',
+        'provinceAddress',
+        'province.isDeleted = :isDeleted',
+        {
+          isDeleted: false,
+        },
+      )
+      .select([
+        'user',
+        'category',
+        'subCategory',
+        'tax',
+        'userAddress.address',
+        'userAddress.id',
+        'wardAddress.id',
+        'wardAddress.name',
+        'districtAddress.id',
+        'districtAddress.name',
+        'provinceAddress.id',
+        'provinceAddress.name',
+      ])
       .getOne();
 
     if (!user) {

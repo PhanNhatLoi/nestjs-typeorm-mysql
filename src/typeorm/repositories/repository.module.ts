@@ -19,6 +19,14 @@ import { UserContact } from '../entities/user-contact.entity';
 import { UserContactRepository } from './user-contact.repository';
 import { LanguageRepository } from './language.repository';
 import { Language } from '../entities/language.entity';
+import { ProvinceRepository } from './province.repository';
+import { Province } from '../entities/province.entity';
+import { District } from '../entities/district.entity';
+import { Ward } from '../entities/ward.entity';
+import { DistrictRepository } from './district.repository';
+import { WardRepository } from './ward.repository';
+import { UserAddress } from '../entities/user-address.entity';
+import { UserAddressRepository } from './user-address.repository';
 
 @Module({
   providers: [],
@@ -73,6 +81,26 @@ export class RepositoryModule {
         useClass: LanguageRepository,
         scope: Scope.REQUEST,
       },
+      {
+        provide: 'IProvinceRepository',
+        useClass: ProvinceRepository,
+        scope: Scope.REQUEST,
+      },
+      {
+        provide: 'IDistrictRepository',
+        useClass: DistrictRepository,
+        scope: Scope.REQUEST,
+      },
+      {
+        provide: 'IWardRepository',
+        useClass: WardRepository,
+        scope: Scope.REQUEST,
+      },
+      {
+        provide: 'IUserAddressRepository',
+        useClass: UserAddressRepository,
+        scope: Scope.REQUEST,
+      },
     ];
 
     const imports = [
@@ -87,6 +115,10 @@ export class RepositoryModule {
           SubCategory,
           UserContact,
           Language,
+          Province,
+          District,
+          Ward,
+          UserAddress,
         ],
         'identity',
       ),

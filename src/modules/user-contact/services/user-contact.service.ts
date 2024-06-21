@@ -34,7 +34,6 @@ export class UserContactService implements IUserContactService {
 
   async get(id: number): Promise<Result<UserContact>> {
     const result = await this._userContactRepository.findOneById(id);
-
     return Results.success(result);
   }
   async update(
@@ -93,6 +92,8 @@ export class UserContactService implements IUserContactService {
           'createdBy.id',
           'createdBy.role',
           'createdBy.isDeleted',
+          'createdBy.name',
+          'createdBy.profileImage',
         ],
       },
       {
