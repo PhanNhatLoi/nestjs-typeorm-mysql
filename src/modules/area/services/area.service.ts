@@ -16,7 +16,7 @@ import { FilterAreaDto } from '../dto/filter.dto';
 import { CreateAreaDto } from '../dto/create.dto';
 import { ERRORS_DICTIONARY } from 'src/shared/constants/error-dictionary.constaint';
 import { UserAccount } from 'src/typeorm/entities/user-account.entity';
-import { DeepPartial, Not } from 'typeorm';
+import { DeepPartial, Like, Not } from 'typeorm';
 
 @Injectable()
 export class AreaService implements IAreaService {
@@ -31,34 +31,58 @@ export class AreaService implements IAreaService {
 
   async gets(
     type: AREA_TYPE,
-    query: FilterAreaDto,
+    filter: FilterAreaDto,
   ): Promise<Result<ResponseAreaDto[]>> {
     if (!Object.keys(AREA_TYPE).includes(type.toLocaleUpperCase())) {
       throw new MethodNotAllowedException();
     }
+
+    const conditions = {
+      isDeleted: false,
+    } as any;
+    if (filter.name) {
+      conditions.name = Like(`%${filter.name}%`);
+    }
+    if (filter.province && type === AREA_TYPE.DISTRICT) {
+      conditions.province = {
+        id: Number(filter.province),
+      };
+    }
+    if (filter.district && type === AREA_TYPE.WARD) {
+      conditions.district = {
+        id: Number(filter.district),
+      };
+    }
+
     switch (type.toUpperCase()) {
       case AREA_TYPE.PROVINCE:
         return Results.success(
           await this._provinceRepository.findAll({
             where: {
+              ...conditions,
               isDeleted: false,
             },
+            select: ['id', 'name'],
           }),
         );
       case AREA_TYPE.DISTRICT:
         return Results.success(
           await this._districtRepository.findAll({
             where: {
+              ...conditions,
               isDeleted: false,
             },
+            select: ['id', 'name'],
           }),
         );
       case AREA_TYPE.WARD:
         return Results.success(
           await this._wardRepository.findAll({
             where: {
+              ...conditions,
               isDeleted: false,
             },
+            select: ['id', 'name'],
           }),
         );
       default:

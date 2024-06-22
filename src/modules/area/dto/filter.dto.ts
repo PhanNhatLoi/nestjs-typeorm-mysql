@@ -1,6 +1,8 @@
-export class FilterAreaDto {
+import { BaseQueryFilter } from 'src/base/request/base-query-filter';
+
+export class FilterAreaDto extends BaseQueryFilter {
   name?: string;
-  provinceId?: number;
-  districtId?: number;
-  wardId?: number;
+  province?: number;
+  district?: number;
+  ward?: number;
 }

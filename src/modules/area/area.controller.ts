@@ -10,19 +10,12 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { BaseController } from 'src/base/controllers/base.controller';
-import { FilterUserAccountDto } from '@modules/user-account/dto/filter-user-account.dto';
 import { JwtAccessTokenGuard } from '@modules/auth/guards/jwt-access-token.guard';
-import {
-  AREA_TYPE,
-  USER_ACTION_TYPE,
-  USER_ROLE,
-} from 'src/shared/constants/global.constants';
+import { AREA_TYPE, USER_ROLE } from 'src/shared/constants/global.constants';
 import { RolesGuard } from '@modules/auth/guards/roles.guard';
 import { Roles } from 'src/base/decorators/roles.decorator';
-import { FilterUserActionDto } from '@modules/user-action/services/dto/filter-action.dto';
-import { FilterUserContactDto } from '@modules/user-contact/dto/filter-contact.dto';
 import { IAreaService } from './services/area.service.interface';
 import { FilterAreaDto } from './dto/filter.dto';
 import { CreateAreaDto } from './dto/create.dto';
@@ -36,9 +29,17 @@ export class AreaController extends BaseController {
   // ==========
   // get list and filter
   // ==========
-  @Get('list/:type')
-  async getAll(@Param('type') type: AREA_TYPE, @Query() query: FilterAreaDto) {
-    return await this._areaService.gets(type, query);
+  @Get('province')
+  async getProvince(@Query() query: FilterAreaDto) {
+    return await this._areaService.gets(AREA_TYPE.PROVINCE, query);
+  }
+  @Get('district')
+  async getDistrict(@Query() query: FilterAreaDto) {
+    return await this._areaService.gets(AREA_TYPE.DISTRICT, query);
+  }
+  @Get('ward')
+  async getWard(@Query() query: FilterAreaDto) {
+    return await this._areaService.gets(AREA_TYPE.WARD, query);
   }
   // ==========
   // get list and filter
