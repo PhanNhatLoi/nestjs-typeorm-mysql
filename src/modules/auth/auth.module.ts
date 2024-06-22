@@ -30,13 +30,33 @@ import { Category } from 'src/typeorm/entities/category.entity';
 import { SubCategoryRepository } from 'src/typeorm/repositories/sub-category.repository';
 import { SubCategory } from 'src/typeorm/entities/sub-category.entity';
 import { TaxRepository } from 'src/typeorm/repositories/tax.repository';
+import { UserAddressRepository } from 'src/typeorm/repositories/user-address.repository';
+import { UserAddress } from 'src/typeorm/entities/user-address.entity';
+import { AreaService } from '@modules/area/services/area.service';
+import { IAreaService } from '@modules/area/services/area.service.interface';
+import { WardRepository } from 'src/typeorm/repositories/ward.repository';
+import { ProvinceRepository } from 'src/typeorm/repositories/province.repository';
+import { DistrictRepository } from 'src/typeorm/repositories/district.repository';
+import { Ward } from 'src/typeorm/entities/ward.entity';
+import { District } from 'src/typeorm/entities/district.entity';
+import { Province } from 'src/typeorm/entities/province.entity';
 
 @Module({
   imports: [
     PassportModule,
     JwtModule.register({}),
     TypeOrmModule.forFeature(
-      [UserAccount, UserVerify, Category, SubCategory, Tax],
+      [
+        UserAccount,
+        UserVerify,
+        Category,
+        SubCategory,
+        Tax,
+        UserAddress,
+        Ward,
+        District,
+        Province,
+      ],
       'identity',
     ),
   ],
@@ -67,6 +87,22 @@ import { TaxRepository } from 'src/typeorm/repositories/tax.repository';
       useClass: UserTaxService,
     },
     {
+      provide: IAreaService,
+      useClass: AreaService,
+    },
+    {
+      provide: 'IWardRepository',
+      useClass: WardRepository,
+    },
+    {
+      provide: 'IDistrictRepository',
+      useClass: DistrictRepository,
+    },
+    {
+      provide: 'IProvinceRepository',
+      useClass: ProvinceRepository,
+    },
+    {
       provide: 'ITaxRepository',
       useClass: TaxRepository,
     },
@@ -85,6 +121,10 @@ import { TaxRepository } from 'src/typeorm/repositories/tax.repository';
     {
       provide: 'IUserAccountRepository',
       useClass: UserAccountRepository,
+    },
+    {
+      provide: 'IUserAddressRepository',
+      useClass: UserAddressRepository,
     },
     LocalStrategy,
     JwtAccessTokenStrategy,

@@ -24,4 +24,5 @@ export abstract class IUserActionService {
     id: number,
     params?: FindOptionsWhere<UserAction>,
   ): Promise<Result<any>>;
+  abstract updateAverageRating(id: number): Promise<boolean>;
 }

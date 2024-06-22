@@ -49,6 +49,7 @@ export class PartnerService implements IPartnerService {
     delete result.response.tax;
     delete result.response.role;
     delete result.response.emailVerified;
+    delete result.response.accessKey;
 
     return Results.success(result.response);
   }
@@ -180,16 +181,16 @@ export class PartnerService implements IPartnerService {
         details: `Rate already exists!!!`,
       });
     } else {
-      return Results.success(
-        await this._userActionService.create({
-          actionType: USER_ACTION_TYPE.RATE,
-          fromUser: createdBy,
-          toUser: toUser,
-          createdBy: createdBy,
-          content: payload.content,
-          value: payload.value,
-        }),
-      ).response;
+      const result = await this._userActionService.create({
+        actionType: USER_ACTION_TYPE.RATE,
+        fromUser: createdBy,
+        toUser: toUser,
+        createdBy: createdBy,
+        content: payload.content,
+        value: payload.value,
+      });
+      await this._userActionService.updateAverageRating(toUserId);
+      return Results.success(result.response);
     }
   }
   async deleteRate(
@@ -204,6 +205,9 @@ export class PartnerService implements IPartnerService {
           id: user.id,
         },
       },
+      relations: {
+        toUser: true,
+      },
     });
     if (!rate.response) {
       throw new BadRequestException({
@@ -211,7 +215,10 @@ export class PartnerService implements IPartnerService {
         details: `Rate not found!!!`,
       });
     }
-    return Results.success((await this._userActionService.delete(id)).response);
+    const result = await this._userActionService.delete(id);
+    await this._userActionService.updateAverageRating(rate.response.toUser.id);
+
+    return result;
   }
   async updateRate(
     user: DeepPartial<UserAccount>,
@@ -226,6 +233,9 @@ export class PartnerService implements IPartnerService {
         },
         isDeleted: false,
       },
+      relations: {
+        toUser: true,
+      },
     });
     if (!result.response) {
       throw new BadRequestException({
@@ -233,8 +243,11 @@ export class PartnerService implements IPartnerService {
         details: `Rate not found!!!`,
       });
     }
-
-    return await this._userActionService.update(id, payload);
+    const updateResult = await this._userActionService.update(id, payload);
+    await this._userActionService.updateAverageRating(
+      result.response.toUser.id,
+    );
+    return updateResult;
   }
 
   async otherAction(
@@ -305,7 +318,7 @@ export class PartnerService implements IPartnerService {
       });
     }
     const findUser = await this._userAccountService.get(id);
-    if (!findUser.response) {
+    if (!findUser.response || findUser.response.emailVerified === false) {
       throw new BadRequestException({
         message: ERRORS_DICTIONARY.USER_NOT_FOUND,
         details: 'Partner not found!!!',

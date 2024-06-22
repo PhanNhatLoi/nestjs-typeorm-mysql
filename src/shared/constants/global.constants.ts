@@ -36,3 +36,9 @@ export enum CONTACT_STATUS {
   DONE = 'DONE',
   REPLIED = 'REPLIED',
 }
+
+export enum AREA_TYPE {
+  PROVINCE = 'PROVINCE',
+  DISTRICT = 'DISTRICT',
+  WARD = 'WARD',
+}

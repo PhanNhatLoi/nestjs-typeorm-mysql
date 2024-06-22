@@ -13,6 +13,7 @@ import { PaginationResult } from 'src/base/response/pagination.result';
 import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 import { UpdateSubCategoryDto } from './dto/update-category.dto';
 import { ICategoryService } from '@modules/category/services/category.service.interface';
+import { IJoinQuery } from 'src/base/repositories/base-repository.interface';
 
 @Injectable()
 export class SubCategoryService implements ISubCategoryService {
@@ -55,19 +56,32 @@ export class SubCategoryService implements ISubCategoryService {
     const result = await this._subCategoryRepository.findOneWithRelations({
       where: {
         id: id,
+        isDeleted: false,
+        parent: {
+          isDeleted: false,
+        },
       },
       relations: {
         parent: true,
       },
     });
-    if (result) {
-      delete result.isDeleted;
+    if (!result) {
+      throw new BadRequestException({
+        message: ERRORS_DICTIONARY.NOT_FOUND,
+        details: 'Sub category not found!!!',
+      });
     }
+    delete result.isDeleted;
     return Results.success(result);
   }
   async gets(): Promise<Result<SubCategory[]>> {
     const result = await this._subCategoryRepository.findAll({
-      where: { ...DefaultFilterQueryable },
+      where: {
+        ...DefaultFilterQueryable,
+        parent: {
+          isDeleted: false,
+        },
+      },
     });
     return Results.success(result);
   }
@@ -109,6 +123,12 @@ export class SubCategoryService implements ISubCategoryService {
         id: In(filter.category.split(',')),
       };
     }
+    const joinQuery: IJoinQuery[] = [
+      {
+        queryString: `category.isDeleted = :isDeleted`,
+        queryParams: { isDeleted: false },
+      },
+    ];
     const result = await this._subCategoryRepository.getPagination(
       filter.page || 1,
       filter.limit || 5,
@@ -117,10 +137,11 @@ export class SubCategoryService implements ISubCategoryService {
         order: filter.orderByQueryClause,
       },
       {
-        alias: 'category',
+        alias: 'subCategory',
         leftJoinAndSelect: {
-          relation1: 'category.parent',
+          category: 'subCategory.parent',
         },
+        joinQuery: joinQuery,
       },
     );
     return Results.success(result);
@@ -131,7 +152,7 @@ export class SubCategoryService implements ISubCategoryService {
     id: number,
     payload: UpdateSubCategoryDto,
   ): Promise<Result<SubCategory>> {
-    const subCategory = await this._subCategoryRepository.findOneById(id);
+    const subCategory = await this.get(id);
     if (!subCategory) {
       throw new BadRequestException({
         message: ERRORS_DICTIONARY.NOT_FOUND,
@@ -150,7 +171,7 @@ export class SubCategoryService implements ISubCategoryService {
         details: 'Sub Category name exist!!!',
       });
     }
-    let parent = subCategory.parent;
+    let parent = subCategory.response.parent;
     if (payload.category) {
       const checkParent = await this._categoryService.get(payload.category);
       if (!checkParent.response) {

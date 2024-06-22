@@ -7,6 +7,9 @@ export class FilterUserAccountDto extends BaseQueryFilter {
   lat?: number;
   lng?: number;
   radius?: number;
+  province?: number;
+  district?: number;
+  ward?: number;
 }
 
 export class FilterUserNearby {

@@ -18,6 +18,7 @@ import { UserContactModule } from '@modules/user-contact/user-contact.module';
 import { LanguageModule } from '@modules/language/language.module';
 import { SettingsModule } from '@modules/settings/settings.module';
 import { DiscountModule } from '@modules/discount/discount.module';
+import { AreaModule } from '@modules/area/area.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { DiscountModule } from '@modules/discount/discount.module';
     LanguageModule,
     SettingsModule,
     DiscountModule,
+    AreaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -12,6 +12,7 @@ import { FilterCategoryDto } from './dto/filter-category.dto';
 import { PaginationResult } from 'src/base/response/pagination.result';
 import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { IJoinQuery } from 'src/base/repositories/base-repository.interface';
 
 @Injectable()
 export class CategoryService implements ICategoryService {
@@ -43,7 +44,17 @@ export class CategoryService implements ICategoryService {
     return Results.success((await this.get(result.id)).response);
   }
   async get(id: number): Promise<Result<Category>> {
-    const result = await this._categoryRepository.findOneById(id);
+    const result = await this._categoryRepository.findOneWithRelations({
+      where: {
+        id: id,
+        children: {
+          isDeleted: false,
+        },
+      },
+      relations: {
+        children: true,
+      },
+    });
     if (result) {
       delete result.isDeleted;
     }
@@ -88,6 +99,12 @@ export class CategoryService implements ICategoryService {
     if (filter.name) {
       conditions.name = Like(`%${filter.name}%`);
     }
+    const joinQuery: IJoinQuery[] = [
+      {
+        queryString: `categories.isDeleted = :isDeleted`,
+        queryParams: { isDeleted: false },
+      },
+    ];
     const result = await this._categoryRepository.getPagination(
       filter.page || 1,
       filter.limit || 5,
@@ -100,6 +117,7 @@ export class CategoryService implements ICategoryService {
         leftJoinAndSelect: {
           categories: 'category.children',
         },
+        joinQuery: joinQuery,
       },
     );
     return Results.success(result);

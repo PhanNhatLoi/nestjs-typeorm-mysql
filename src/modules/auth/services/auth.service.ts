@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -38,6 +39,8 @@ import { ICategoryService } from 'src/modules/category/services/category.service
 import { ISubCategoryService } from 'src/modules/sub-category/services/sub-category.service.interface';
 import { IUserTaxService } from 'src/modules/user-tax/services/user-tax.service.interface';
 import { SendOtpDto } from '../dto/send-otp.dto';
+import { IUserAddressRepository } from 'src/typeorm/repositories/abstractions/user-address.repository.interface';
+import { IWardRepository } from 'src/typeorm/repositories/abstractions/ward.repository.interface';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -51,6 +54,10 @@ export class AuthService implements IAuthService {
     private readonly _categoryService: ICategoryService,
     private readonly _subCategoryService: ISubCategoryService,
     private readonly _userTaxService: IUserTaxService,
+    @Inject('IWardRepository')
+    private readonly _wardRepository: IWardRepository,
+    @Inject('IUserAddressRepository')
+    private readonly _userAddressRepository: IUserAddressRepository,
     configService: ConfigService,
   ) {
     this._jwtServiceConfig =
@@ -367,6 +374,34 @@ export class AuthService implements IAuthService {
         payload.subCategories || [],
       );
 
+      if (user.userAddress) {
+        if (payload.userAddress) {
+          if (payload.userAddress.wardId) {
+            const ward = await this._wardRepository.findOneByConditions({
+              where: {
+                id: payload.userAddress.wardId,
+                isDeleted: false,
+              },
+            });
+            if (ward) {
+              user.userAddress.ward = ward;
+            }
+          }
+          await this._userAddressRepository.save({
+            ...user.userAddress,
+            ...payload.userAddress,
+            modifiedDate: new Date(),
+          });
+        }
+      } else {
+        const newAddress = await this._userAddressRepository.save({
+          address: '',
+          modifiedBy: user,
+          createdBy: user,
+        });
+        user.userAddress = newAddress;
+      }
+
       if (user.tax) {
         await this._userTaxService.update(user.tax.id, {
           ...user.tax,
@@ -376,8 +411,8 @@ export class AuthService implements IAuthService {
         const newTax = await this._userTaxService.create({
           businessType: '',
           address: '',
-          email: 'string',
-          taxCode: 'string',
+          email: '',
+          taxCode: '',
           photoLicense: [],
           photoCatholic: [],
           ...payload.tax,
@@ -395,7 +430,6 @@ export class AuthService implements IAuthService {
         subCategories:
           (payload.subCategories && subCategories.response) || undefined,
         modifiedDate: new Date(),
-        // tax: tax,
       });
 
       return await this.getInfo(id);

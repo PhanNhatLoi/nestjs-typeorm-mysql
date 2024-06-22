@@ -11,18 +11,20 @@ import { FilterUserActionDto } from './dto/filter-action.dto';
 import { PaginationResult } from 'src/base/response/pagination.result';
 import { FindOptionsWhere } from 'typeorm';
 import { USER_ACTION_TYPE } from 'src/shared/constants/global.constants';
+import { IUserAccountService } from '@modules/user-account/services/user-account.service.interface';
 
 @Injectable()
 export class UserActionService implements IUserActionService {
   constructor(
     @Inject('IUserActionRepository')
     private readonly _userActionRepository: IUserActionRepository,
+    @Inject('IUserAccountRepository')
+    private readonly _userAccountService: IUserAccountService,
   ) {}
 
   async get(id: number): Promise<Result<UserAction>> {
     const result = await this._userActionRepository.findOneById(id);
     if (!result) {
-      console.log(12345);
       throw new BadRequestException({
         message: ERRORS_DICTIONARY.NOT_FOUND,
         details: 'Data not found!!!',
@@ -152,5 +154,24 @@ export class UserActionService implements IUserActionService {
     }, initResult);
 
     return Results.success(groupedActions);
+  }
+  async updateAverageRating(id: number): Promise<boolean> {
+    const queryBuilder = await this._userActionRepository
+      .createQueryBuilder('user_action')
+      .leftJoinAndSelect('user_action.toUser', 'toUser')
+      .where('toUser.id = :id', { id: id })
+      .andWhere('user_action.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('user_action.actionType = :actionType', {
+        actionType: USER_ACTION_TYPE.RATE,
+      })
+      .select([
+        'SUM(user_action.value) / Count(user_action.value) averageRating',
+      ])
+      .getRawOne();
+    const averageRating = Number(Number(queryBuilder.averageRating).toFixed(1));
+    await this._userAccountService.update(id, {
+      averageRating: averageRating,
+    });
+    return true;
   }
 }
