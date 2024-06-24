@@ -152,6 +152,8 @@ export abstract class BaseRepository<T extends HasId>
         queryBuilder.innerJoinAndSelect(
           joinOptions.innerJoinAndSelect[key],
           key,
+          `${key}.isDeleted = :isDeleted`,
+          { isDeleted: false },
         );
       });
     }
@@ -159,7 +161,12 @@ export abstract class BaseRepository<T extends HasId>
     // function for leftJoin
     if (joinOptions?.leftJoinAndSelect) {
       Object.keys(joinOptions.leftJoinAndSelect).forEach((key) => {
-        queryBuilder.leftJoinAndSelect(joinOptions.leftJoinAndSelect[key], key);
+        queryBuilder.leftJoinAndSelect(
+          joinOptions.leftJoinAndSelect[key],
+          key,
+          `${key}.isDeleted = :isDeleted`,
+          { isDeleted: false },
+        );
       });
     }
     // any case special must be query table join
