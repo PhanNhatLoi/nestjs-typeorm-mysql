@@ -41,4 +41,5 @@ export abstract class IAuthService {
   abstract verifyChangePassword(
     payload: verifyChangePasswordDto,
   ): Promise<{ accessKey: string }>;
+  abstract validateToken(token: string): Promise<UserAccount>;
 }

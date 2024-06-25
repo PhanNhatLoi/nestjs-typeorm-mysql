@@ -9,6 +9,7 @@ export abstract class IUserAccountService {
   abstract create(payload: CreateUserAccountDto): Promise<Result<UserAccount>>;
   abstract getPagination(
     filter: FilterUserAccountDto,
+    userId?: number,
   ): Promise<Result<PaginationResult<UserAccount>>>;
   abstract get(id: number): Promise<Result<UserAccount>>;
   abstract findParams(params: {

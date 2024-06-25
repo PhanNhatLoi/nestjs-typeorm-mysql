@@ -40,6 +40,7 @@ export interface IBaseRepository<T> {
       nearby?: INearby;
       select?: string[];
       random?: boolean;
+      customSort?: (data: T[]) => T[];
     },
     joinOptions?: {
       alias: string;

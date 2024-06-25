@@ -9,15 +9,14 @@ import { UpdateUserAccountDto } from 'src/modules/user-account/dto/update-user-a
 import { IUserAccountService } from 'src/modules/user-account/services/user-account.service.interface';
 import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 import { IUserAccountRepository } from 'src/typeorm/repositories/abstractions/user-account.repository.interface';
-import { FindOptionsOrder, FindOptionsWhere, In, Like } from 'typeorm';
+import { FindOptionsOrder, FindOptionsWhere, In, Like, Not } from 'typeorm';
 import { ERRORS_DICTIONARY } from 'src/shared/constants/error-dictionary.constaint';
 import { AccountInfoResponseDto } from 'src/modules/auth/dto/auth-response.dto';
 import * as bcrypt from 'bcrypt';
 import { USER_ROLE } from 'src/shared/constants/global.constants';
-import {
-  IJoinQuery,
-  INearby,
-} from 'src/base/repositories/base-repository.interface';
+import { IJoinQuery } from 'src/base/repositories/base-repository.interface';
+import { Category } from 'src/typeorm/entities/category.entity';
+import { ISubCategoryRepository } from 'src/typeorm/repositories/abstractions/sub-category.repository.interface';
 
 export const saltOrRounds = 10;
 
@@ -26,6 +25,8 @@ export class UserAccountService implements IUserAccountService {
   constructor(
     @Inject('IUserAccountRepository')
     private readonly _userAccountRepository: IUserAccountRepository,
+    @Inject('ISubCategoryRepository')
+    private readonly _subCategoryRepository: ISubCategoryRepository,
   ) {}
   async gets(): Promise<Result<UserAccount[]>> {
     const result = await this._userAccountRepository.findAll({
@@ -68,13 +69,31 @@ export class UserAccountService implements IUserAccountService {
 
   async getPagination(
     filter: FilterUserAccountDto,
+    userId?: number,
   ): Promise<Result<PaginationResult<UserAccount>>> {
     //custom filter
     const conditions = {
       isDeleted: false,
       emailVerified: true,
       role: In([USER_ROLE.USER, USER_ROLE.ENTERPRISE]),
-    } as FindOptionsWhere<UserAccount> & { nearby?: INearby };
+    } as FindOptionsWhere<UserAccount>;
+    let subCategories = [];
+    if (userId) {
+      conditions.id = Not(userId);
+      if (filter.orderBy?.includes('relation')) {
+        subCategories = await this._subCategoryRepository.findAll({
+          where: {
+            users: {
+              id: userId,
+            },
+          },
+        });
+      }
+    }
+    const relationSortType = filter.orderBy?.includes('relation')
+      ? filter.orderBy.split(',')[1] || undefined
+      : undefined;
+    delete filter.orderBy;
 
     const joinQuery: IJoinQuery[] = [];
     if (filter.category) {
@@ -127,8 +146,11 @@ export class UserAccountService implements IUserAccountService {
     if (filter.orderBy) {
       order = {};
       const temp = filter.orderBy.split(',');
-      if (temp[1] && ['ACS', 'DESC'].includes(temp[1].toUpperCase()))
-        order[`user.${temp[0].trim()}`] = temp[1].toUpperCase().trim();
+      if (temp[1] && ['ACS', 'DESC'].includes(temp[1].toUpperCase())) {
+        if (temp[0].toLocaleLowerCase() === 'lasted-post') {
+          order[`discounts.createdDate`] = temp[1].toUpperCase().trim();
+        } else order[`user.${temp[0].trim()}`] = temp[1].toUpperCase().trim();
+      }
     }
 
     const result = await this._userAccountRepository.getPagination(
@@ -144,6 +166,16 @@ export class UserAccountService implements IUserAccountService {
             lng: filter.lng,
             radius: filter.radius,
           },
+        customSort: (data: UserAccount[]) => {
+          if (subCategories.length)
+            return this.sortUserAccountsBySimilarity(
+              data,
+              subCategories,
+              (relationSortType?.toLocaleUpperCase() as 'DESC' | 'ASC') ||
+                'DESC',
+            );
+          return data;
+        },
         select: [
           'user.id',
           'user.createdDate',
@@ -176,6 +208,7 @@ export class UserAccountService implements IUserAccountService {
           'district.id',
           'province.name',
           'province.id',
+          'discounts',
         ],
       },
       {
@@ -193,6 +226,40 @@ export class UserAccountService implements IUserAccountService {
       },
     );
     return Results.success(result);
+  }
+
+  // Function to calculate similarity
+  calculateSimilarity(
+    userCategories: Category[],
+    givenCategories: Category[],
+  ): number {
+    const userCategoryIds = userCategories.map((category) => category.id);
+    const givenCategoryIds = givenCategories.map((category) => category.id);
+
+    const matchingCategories = userCategoryIds.filter((id) =>
+      givenCategoryIds.includes(id),
+    );
+    return matchingCategories.length;
+  }
+
+  // Function to sort user accounts by similarity
+  sortUserAccountsBySimilarity(
+    userAccounts: UserAccount[],
+    givenCategories: Category[],
+    type: 'DESC' | 'ASC',
+  ): UserAccount[] {
+    return userAccounts.sort((a, b) => {
+      const similarityA = this.calculateSimilarity(
+        a.categories,
+        givenCategories,
+      );
+      const similarityB = this.calculateSimilarity(
+        b.categories,
+        givenCategories,
+      );
+      if (type === 'DESC') return similarityB - similarityA; // Sort in descending order
+      return similarityA - similarityB; // Sort in asc order
+    });
   }
   async get(id: number): Promise<Result<AccountInfoResponseDto>> {
     const result = await this._userAccountRepository.findOneById(id);

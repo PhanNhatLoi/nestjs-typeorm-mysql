@@ -31,8 +31,9 @@ export class PartnerService implements IPartnerService {
 
   async getPagination(
     filter: FilterUserAccountDto,
+    userId?: number,
   ): Promise<Result<PaginationResult<UserAccount>>> {
-    const result = await this._userAccountService.getPagination(filter);
+    const result = await this._userAccountService.getPagination(filter, userId);
     return Results.success(result.response);
   }
   async get(id: number): Promise<Result<AccountInfoResponseDto>> {

@@ -27,6 +27,7 @@ import { UpdateRateDto } from './dto/update-rate.dto';
 import { FilterUserActionDto } from '@modules/user-action/services/dto/filter-action.dto';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { FilterUserContactDto } from '@modules/user-contact/dto/filter-contact.dto';
+import { OptionalJwtAuthGuard } from '@modules/auth/guards/jwt-optional-token.guard';
 
 @Controller('partner')
 @ApiTags('Partner')
@@ -38,9 +39,14 @@ export class PartnerController extends BaseController {
   // ==========
   // get list and filter
   // ==========
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('list')
-  async getPagination(@Query() pageOptionsDto: FilterUserAccountDto) {
-    return await this._partnerService.getPagination(pageOptionsDto);
+  async getPagination(
+    @Query() pageOptionsDto: FilterUserAccountDto,
+    @Req() req,
+  ) {
+    const { user } = req;
+    return await this._partnerService.getPagination(pageOptionsDto, user?.id);
   }
   // ==========
   // get list and filter
