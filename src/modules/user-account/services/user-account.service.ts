@@ -80,7 +80,13 @@ export class UserAccountService implements IUserAccountService {
     let subCategories = [];
     if (userId) {
       conditions.id = Not(userId);
-      if (filter.orderBy?.includes('relation')) {
+    }
+    const relationSortType = filter.orderBy?.includes('relation')
+      ? filter.orderBy.split(',')[1] || undefined
+      : undefined;
+    if (filter.orderBy?.includes('relation')) {
+      delete filter.orderBy;
+      if (userId) {
         subCategories = await this._subCategoryRepository.findAll({
           where: {
             users: {
@@ -90,10 +96,6 @@ export class UserAccountService implements IUserAccountService {
         });
       }
     }
-    const relationSortType = filter.orderBy?.includes('relation')
-      ? filter.orderBy.split(',')[1] || undefined
-      : undefined;
-    delete filter.orderBy;
 
     const joinQuery: IJoinQuery[] = [];
     if (filter.category) {
@@ -146,7 +148,7 @@ export class UserAccountService implements IUserAccountService {
     if (filter.orderBy) {
       order = {};
       const temp = filter.orderBy.split(',');
-      if (temp[1] && ['ACS', 'DESC'].includes(temp[1].toUpperCase())) {
+      if (temp[1] && ['ASC', 'DESC'].includes(temp[1].toUpperCase())) {
         if (temp[0].toLocaleLowerCase() === 'lasted-post') {
           order[`discounts.createdDate`] = temp[1].toUpperCase().trim();
         } else order[`user.${temp[0].trim()}`] = temp[1].toUpperCase().trim();
@@ -208,7 +210,7 @@ export class UserAccountService implements IUserAccountService {
           'district.id',
           'province.name',
           'province.id',
-          'discounts',
+          // 'discounts',
         ],
       },
       {
