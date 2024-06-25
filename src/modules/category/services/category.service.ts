@@ -12,7 +12,6 @@ import { FilterCategoryDto } from './dto/filter-category.dto';
 import { PaginationResult } from 'src/base/response/pagination.result';
 import { UserAccount } from 'src/typeorm/entities/user-account.entity';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { IJoinQuery } from 'src/base/repositories/base-repository.interface';
 
 @Injectable()
 export class CategoryService implements ICategoryService {

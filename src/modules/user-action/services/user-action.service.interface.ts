@@ -25,4 +25,5 @@ export abstract class IUserActionService {
     params?: FindOptionsWhere<UserAction>,
   ): Promise<Result<any>>;
   abstract updateAverageRating(id: number): Promise<boolean>;
+  abstract updateFavorite(id: number): Promise<boolean>;
 }

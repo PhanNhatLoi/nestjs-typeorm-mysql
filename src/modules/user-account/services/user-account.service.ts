@@ -164,6 +164,9 @@ export class UserAccountService implements IUserAccountService {
           'user.achievements',
           'user.averageRating',
           'user.location',
+          'user.favorite',
+          'user.view',
+          'user.averageRatingFromAdmin',
           'categories',
           'subCategories',
           'address',
@@ -180,6 +183,7 @@ export class UserAccountService implements IUserAccountService {
         leftJoinAndSelect: {
           categories: 'user.categories',
           subCategories: 'user.subCategories',
+          discounts: 'user.discounts',
           address: 'user.userAddress',
           ward: 'address.ward',
           district: 'ward.district',

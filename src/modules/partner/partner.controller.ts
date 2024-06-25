@@ -242,8 +242,7 @@ export class PartnerController extends BaseController {
   // ==========
   // rating to partner
   // ==========
-  @UseGuards(JwtAccessTokenGuard, RolesGuard)
-  @Roles(USER_ROLE.ENTERPRISE, USER_ROLE.USER)
+  @UseGuards(JwtAccessTokenGuard)
   @ApiBody({
     type: CreateRateDto,
     examples: {

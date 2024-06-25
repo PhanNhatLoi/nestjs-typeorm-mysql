@@ -10,7 +10,10 @@ import { UpdateUserActionDto } from './dto/update-user-action.dto';
 import { FilterUserActionDto } from './dto/filter-action.dto';
 import { PaginationResult } from 'src/base/response/pagination.result';
 import { FindOptionsWhere } from 'typeorm';
-import { USER_ACTION_TYPE } from 'src/shared/constants/global.constants';
+import {
+  USER_ACTION_TYPE,
+  USER_ROLE,
+} from 'src/shared/constants/global.constants';
 import { IUserAccountService } from '@modules/user-account/services/user-account.service.interface';
 
 @Injectable()
@@ -156,21 +159,59 @@ export class UserActionService implements IUserActionService {
     return Results.success(groupedActions);
   }
   async updateAverageRating(id: number): Promise<boolean> {
+    const queryBuilderFromUser = await this._userActionRepository
+      .createQueryBuilder('user_action')
+      .leftJoinAndSelect('user_action.toUser', 'toUser')
+      .leftJoinAndSelect('user_action.fromUser', 'fromUser')
+      .where('toUser.id = :id', { id: id })
+      .andWhere('user_action.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('user_action.actionType = :actionType', {
+        actionType: USER_ACTION_TYPE.RATE,
+      })
+      .andWhere('fromUser.role != :role', { role: USER_ROLE.SUPPER_ADMIN })
+      .select([
+        'SUM(user_action.value) / Count(user_action.value) averageRating',
+      ])
+      .getRawOne();
+    const averageRatingFromUser = Number(
+      queryBuilderFromUser.averageRating,
+    ).toFixed(1);
+    const queryBuilderFromAdmin = await this._userActionRepository
+      .createQueryBuilder('user_action')
+      .leftJoinAndSelect('user_action.toUser', 'toUser')
+      .leftJoinAndSelect('user_action.fromUser', 'fromUser')
+      .where('toUser.id = :id', { id: id })
+      .andWhere('user_action.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('user_action.actionType = :actionType', {
+        actionType: USER_ACTION_TYPE.RATE,
+      })
+      .andWhere('fromUser.role = :role', { role: USER_ROLE.SUPPER_ADMIN })
+      .select([
+        'SUM(user_action.value) / Count(user_action.value) averageRating',
+      ])
+      .getRawOne();
+
+    const averageRatingFromAdmin = Number(
+      queryBuilderFromAdmin.averageRating,
+    ).toFixed(1);
+    await this._userAccountService.update(id, {
+      averageRating: averageRatingFromUser,
+      averageRatingFromAdmin: averageRatingFromAdmin,
+    });
+    return true;
+  }
+  async updateFavorite(id: number): Promise<boolean> {
     const queryBuilder = await this._userActionRepository
       .createQueryBuilder('user_action')
       .leftJoinAndSelect('user_action.toUser', 'toUser')
       .where('toUser.id = :id', { id: id })
       .andWhere('user_action.isDeleted = :isDeleted', { isDeleted: false })
       .andWhere('user_action.actionType = :actionType', {
-        actionType: USER_ACTION_TYPE.RATE,
+        actionType: USER_ACTION_TYPE.FAVORITE,
       })
-      .select([
-        'SUM(user_action.value) / Count(user_action.value) averageRating',
-      ])
-      .getRawOne();
-    const averageRating = Number(Number(queryBuilder.averageRating).toFixed(1));
+      .getCount();
     await this._userAccountService.update(id, {
-      averageRating: averageRating,
+      favorite: queryBuilder,
     });
     return true;
   }
