@@ -17,6 +17,7 @@ import { USER_ROLE } from 'src/shared/constants/global.constants';
 import { IJoinQuery } from 'src/base/repositories/base-repository.interface';
 import { Category } from 'src/typeorm/entities/category.entity';
 import { ISubCategoryRepository } from 'src/typeorm/repositories/abstractions/sub-category.repository.interface';
+import { SubCategory } from 'src/typeorm/entities/sub-category.entity';
 
 export const saltOrRounds = 10;
 
@@ -232,8 +233,8 @@ export class UserAccountService implements IUserAccountService {
 
   // Function to calculate similarity
   calculateSimilarity(
-    userCategories: Category[],
-    givenCategories: Category[],
+    userCategories: SubCategory[],
+    givenCategories: SubCategory[],
   ): number {
     const userCategoryIds = userCategories.map((category) => category.id);
     const givenCategoryIds = givenCategories.map((category) => category.id);
@@ -247,17 +248,17 @@ export class UserAccountService implements IUserAccountService {
   // Function to sort user accounts by similarity
   sortUserAccountsBySimilarity(
     userAccounts: UserAccount[],
-    givenCategories: Category[],
+    givenSubCategories: SubCategory[],
     type: 'DESC' | 'ASC',
   ): UserAccount[] {
     return userAccounts.sort((a, b) => {
       const similarityA = this.calculateSimilarity(
-        a.categories,
-        givenCategories,
+        a.subCategories,
+        givenSubCategories,
       );
       const similarityB = this.calculateSimilarity(
-        b.categories,
-        givenCategories,
+        b.subCategories,
+        givenSubCategories,
       );
       if (type === 'DESC') return similarityB - similarityA; // Sort in descending order
       return similarityA - similarityB; // Sort in asc order
