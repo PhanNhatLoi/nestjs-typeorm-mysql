@@ -108,6 +108,11 @@ export class UserActionService implements IUserActionService {
         id: filter.toUserId,
       };
     }
+    if (filter.createdById) {
+      conditions.createdBy = {
+        id: filter.createdById,
+      };
+    }
     const result = await this._userActionRepository.getPagination(
       filter.page || 1,
       filter.limit || 5,
@@ -122,12 +127,19 @@ export class UserActionService implements IUserActionService {
           'createdBy.profileImage',
           'createdBy.bannerMedia',
           'createdBy.isDeleted',
+          'toUser.id',
+          'toUser.email',
+          'toUser.name',
+          'toUser.profileImage',
+          'toUser.bannerMedia',
+          'toUser.isDeleted',
         ],
       },
       {
         alias: 'user_action',
         leftJoinAndSelect: {
           createdBy: 'user_action.createdBy',
+          toUser: 'user_action.toUser',
         },
       },
     );
