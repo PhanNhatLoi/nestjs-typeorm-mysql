@@ -491,4 +491,14 @@ export class AuthService implements IAuthService {
 
     return result;
   };
+  async validateToken(token: string): Promise<UserAccount> {
+    try {
+      const decoded = this._jwtService.verify(token);
+      console.log(decoded, 1234);
+      // const result = await this._userAccountService.get(id)
+      return decoded; // or user object
+    } catch (e) {
+      return null;
+    }
+  }
 }

@@ -31,8 +31,9 @@ export class PartnerService implements IPartnerService {
 
   async getPagination(
     filter: FilterUserAccountDto,
+    userId?: number,
   ): Promise<Result<PaginationResult<UserAccount>>> {
-    const result = await this._userAccountService.getPagination(filter);
+    const result = await this._userAccountService.getPagination(filter, userId);
     return Results.success(result.response);
   }
   async get(id: number): Promise<Result<AccountInfoResponseDto>> {
@@ -72,20 +73,23 @@ export class PartnerService implements IPartnerService {
     });
 
     if (checkFavorite.response) {
-      return Results.success(
-        await this._userActionService.update(checkFavorite.response.id, {
+      const result = await this._userActionService.update(
+        checkFavorite.response.id,
+        {
           isDeleted: !checkFavorite.response.isDeleted,
-        }),
-      ).response;
+        },
+      );
+      await this._userActionService.updateFavorite(Number(id));
+      return Results.success(result.response);
     } else {
-      return Results.success(
-        await this._userActionService.create({
-          actionType: USER_ACTION_TYPE.FAVORITE,
-          fromUser: user,
-          toUser: toUser,
-          createdBy: user,
-        }),
-      ).response;
+      const result = await this._userActionService.create({
+        actionType: USER_ACTION_TYPE.FAVORITE,
+        fromUser: user,
+        toUser: toUser,
+        createdBy: user,
+      });
+      await this._userActionService.updateFavorite(Number(id));
+      return Results.success(result.response);
     }
   }
 
@@ -271,6 +275,11 @@ export class PartnerService implements IPartnerService {
     if (checkView.response) {
       return Results.success(checkView.response);
     } else {
+      if (action === USER_ACTION_TYPE.VIEW) {
+        await this._userAccountService.update(id, {
+          view: toUser.view + 1,
+        });
+      }
       return Results.success(
         await this._userActionService.create({
           actionType: action as USER_ACTION_TYPE,

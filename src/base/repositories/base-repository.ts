@@ -93,12 +93,14 @@ export abstract class BaseRepository<T extends HasId>
   async preload(entity: DeepPartial<T>): Promise<T> {
     return await this.repository.preload(entity);
   }
+
   async getPagination(
     page: number,
     limit: number,
     query?: FindManyOptions<T> & {
       nearby?: INearby;
       random?: boolean;
+      customSort?: (data: T[]) => T[];
     },
     joinOptions?: {
       alias: string;
@@ -199,7 +201,13 @@ export abstract class BaseRepository<T extends HasId>
     }
 
     const count = await queryBuilder.getCount();
-    const data = await queryBuilder.take(take).skip(skip).getMany();
+    let data = await queryBuilder.getMany();
+
+    if (query?.customSort) {
+      data = query.customSort(data);
+    }
+
+    const paginatedData = data.slice(skip, skip + take);
 
     const result = new PaginationResult<T>();
     result.pagination.page = page;
@@ -208,7 +216,7 @@ export abstract class BaseRepository<T extends HasId>
     result.pagination.pageCount = Math.ceil(
       result.pagination.total / result.pagination.limit,
     );
-    result.data = data;
+    result.data = paginatedData;
 
     return result;
   }

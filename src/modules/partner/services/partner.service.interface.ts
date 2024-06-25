@@ -18,6 +18,7 @@ export type OtherAction =
 export abstract class IPartnerService {
   abstract getPagination(
     filter: FilterUserAccountDto,
+    userId?: number,
   ): Promise<Result<PaginationResult<UserAccount>>>;
   abstract get(id: number): Promise<Result<UserAccount>>;
 

@@ -19,7 +19,8 @@ import { LanguageModule } from '@modules/language/language.module';
 import { SettingsModule } from '@modules/settings/settings.module';
 import { DiscountModule } from '@modules/discount/discount.module';
 import { AreaModule } from '@modules/area/area.module';
-
+import { AppGateway } from '@modules/gatewaies/app.gateway';
+import { GatewayModules } from '@modules/gatewaies/gateway.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -44,6 +45,7 @@ import { AreaModule } from '@modules/area/area.module';
     SettingsModule,
     DiscountModule,
     AreaModule,
+    GatewayModules,
   ],
   controllers: [AppController],
   providers: [AppService],

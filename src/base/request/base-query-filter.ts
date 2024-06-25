@@ -35,7 +35,7 @@ export class BaseQueryFilter implements IBaseQueryFilter {
 
   @ApiPropertyOptional({
     name: 'orderBy',
-    description: `fieldName,acs || desc \r\n
+    description: `fieldName,asc || desc \r\n
     Supports only one at the once time`,
   })
   orderBy?: string;

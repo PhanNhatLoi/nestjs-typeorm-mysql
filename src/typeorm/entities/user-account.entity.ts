@@ -195,8 +195,26 @@ export class UserAccount {
   categories: Category[];
 
   // average rating
-  @Column('decimal', { precision: 2, scale: 1, default: 0 })
+  @Column('decimal', { precision: 2, scale: 1, default: 0.0 })
   averageRating: number;
+
+  // average rating from admin
+  @Column('decimal', { precision: 2, scale: 1, default: 0.0 })
+  averageRatingFromAdmin: number;
+
+  // view
+  @Column({
+    name: 'View',
+    default: 0,
+  })
+  view: number;
+
+  // favorite
+  @Column({
+    name: 'Favorite',
+    default: 0,
+  })
+  favorite: number;
 
   //location for feature search nearby
   @Column({
