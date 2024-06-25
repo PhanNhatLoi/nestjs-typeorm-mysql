@@ -17,6 +17,7 @@ import { USER_ROLE } from 'src/shared/constants/global.constants';
 import { IJoinQuery } from 'src/base/repositories/base-repository.interface';
 import { Category } from 'src/typeorm/entities/category.entity';
 import { ISubCategoryRepository } from 'src/typeorm/repositories/abstractions/sub-category.repository.interface';
+import { SubCategory } from 'src/typeorm/entities/sub-category.entity';
 
 export const saltOrRounds = 10;
 
@@ -80,7 +81,13 @@ export class UserAccountService implements IUserAccountService {
     let subCategories = [];
     if (userId) {
       conditions.id = Not(userId);
-      if (filter.orderBy?.includes('relation')) {
+    }
+    const relationSortType = filter.orderBy?.includes('relation')
+      ? filter.orderBy.split(',')[1] || undefined
+      : undefined;
+    if (filter.orderBy?.includes('relation')) {
+      delete filter.orderBy;
+      if (userId) {
         subCategories = await this._subCategoryRepository.findAll({
           where: {
             users: {
@@ -90,10 +97,6 @@ export class UserAccountService implements IUserAccountService {
         });
       }
     }
-    const relationSortType = filter.orderBy?.includes('relation')
-      ? filter.orderBy.split(',')[1] || undefined
-      : undefined;
-    delete filter.orderBy;
 
     const joinQuery: IJoinQuery[] = [];
     if (filter.category) {
@@ -146,7 +149,7 @@ export class UserAccountService implements IUserAccountService {
     if (filter.orderBy) {
       order = {};
       const temp = filter.orderBy.split(',');
-      if (temp[1] && ['ACS', 'DESC'].includes(temp[1].toUpperCase())) {
+      if (temp[1] && ['ASC', 'DESC'].includes(temp[1].toUpperCase())) {
         if (temp[0].toLocaleLowerCase() === 'lasted-post') {
           order[`discounts.createdDate`] = temp[1].toUpperCase().trim();
         } else order[`user.${temp[0].trim()}`] = temp[1].toUpperCase().trim();
@@ -208,7 +211,7 @@ export class UserAccountService implements IUserAccountService {
           'district.id',
           'province.name',
           'province.id',
-          'discounts',
+          // 'discounts',
         ],
       },
       {
@@ -230,8 +233,8 @@ export class UserAccountService implements IUserAccountService {
 
   // Function to calculate similarity
   calculateSimilarity(
-    userCategories: Category[],
-    givenCategories: Category[],
+    userCategories: SubCategory[],
+    givenCategories: SubCategory[],
   ): number {
     const userCategoryIds = userCategories.map((category) => category.id);
     const givenCategoryIds = givenCategories.map((category) => category.id);
@@ -245,17 +248,17 @@ export class UserAccountService implements IUserAccountService {
   // Function to sort user accounts by similarity
   sortUserAccountsBySimilarity(
     userAccounts: UserAccount[],
-    givenCategories: Category[],
+    givenSubCategories: SubCategory[],
     type: 'DESC' | 'ASC',
   ): UserAccount[] {
     return userAccounts.sort((a, b) => {
       const similarityA = this.calculateSimilarity(
-        a.categories,
-        givenCategories,
+        a.subCategories,
+        givenSubCategories,
       );
       const similarityB = this.calculateSimilarity(
-        b.categories,
-        givenCategories,
+        b.subCategories,
+        givenSubCategories,
       );
       if (type === 'DESC') return similarityB - similarityA; // Sort in descending order
       return similarityA - similarityB; // Sort in asc order
