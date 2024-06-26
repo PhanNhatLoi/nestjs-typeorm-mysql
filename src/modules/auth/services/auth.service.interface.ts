@@ -24,7 +24,7 @@ export abstract class IAuthService {
   abstract signUp(user: SignUpDto): Promise<String>;
   abstract sendOtp(
     payload: SendOtpDto,
-    type: 'register' | 'resetPassword',
+    type: 'register' | 'resetPassword' | 'resend',
   ): Promise<String>;
   abstract changePassword(payload: ChangePasswordDto): Promise<String>;
   abstract getUserIfRefreshTokenMatched(
