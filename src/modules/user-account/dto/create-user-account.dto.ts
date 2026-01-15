@@ -4,6 +4,7 @@ export class CreateUserAccountDto {
   email: string;
   phone: string;
   password: string;
+  profileImage: string;
   socialLinks: {
     platform: string;
     accountName: string;

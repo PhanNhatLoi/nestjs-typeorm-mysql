@@ -41,6 +41,7 @@ import { IUserTaxService } from 'src/modules/user-tax/services/user-tax.service.
 import { SendOtpDto } from '../dto/send-otp.dto';
 import { IUserAddressRepository } from 'src/typeorm/repositories/abstractions/user-address.repository.interface';
 import { IWardRepository } from 'src/typeorm/repositories/abstractions/ward.repository.interface';
+import { ResendTemplate } from '@modules/sendmail/template/resend-html';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -104,7 +105,7 @@ export class AuthService implements IAuthService {
         });
       }
       if (!userAccount.response) {
-        await this._userAccountService.create({
+        const result = await this._userAccountService.create({
           ...userDto,
           role: userDto.role,
           socialLinks: [],
@@ -114,7 +115,16 @@ export class AuthService implements IAuthService {
             lng: 0,
           },
           bannerMedia: [],
-          favoriteBibleWords: {},
+          favoriteBibleWords: {
+            title: '',
+            content: '',
+          },
+          profileImage: 'default.png',
+        });
+        await this._userAddressRepository.save({
+          address: '',
+          createdBy: result.response,
+          modifiedBy: result.response,
         });
       }
 
@@ -288,7 +298,7 @@ export class AuthService implements IAuthService {
 
   async sendOtp(
     payload: SendOtpDto,
-    type: 'register' | 'resetPassword',
+    type: 'register' | 'resetPassword' | 'resend',
   ): Promise<String> {
     try {
       const userAccount = await this._userAccountService.findParams({
@@ -306,16 +316,20 @@ export class AuthService implements IAuthService {
       }
 
       const newCode = Math.floor(100000 + Math.random() * 900000).toString(); //generate code 6 digit
-      const htmlTemplate =
-        type === 'register' ? SignUpTemplate(newCode) : ForgotTemplate(newCode);
-      await this.sendMailService.sendmail({
-        sendTo: payload.email,
-        subject: '<noreply> This is email verify Email forgotPassword',
-        content: htmlTemplate,
-      });
       await this._userVerifyService.create({
         email: payload.email,
         otp: newCode,
+      });
+      const htmlTemplate =
+        type === 'register'
+          ? SignUpTemplate(newCode)
+          : type === 'resend'
+          ? ResendTemplate(newCode)
+          : ForgotTemplate(newCode);
+      await this.sendMailService.sendmail({
+        sendTo: payload.email,
+        subject: '<noreply> This is email verify Otp Email',
+        content: htmlTemplate,
       });
 
       return 'An otp email has been sent to your email, please check';
@@ -396,6 +410,7 @@ export class AuthService implements IAuthService {
       } else {
         const newAddress = await this._userAddressRepository.save({
           address: '',
+          ...payload.userAddress,
           modifiedBy: user,
           createdBy: user,
         });
@@ -494,7 +509,7 @@ export class AuthService implements IAuthService {
   async validateToken(token: string): Promise<UserAccount> {
     try {
       const decoded = this._jwtService.verify(token);
-      console.log(decoded, 1234);
+
       // const result = await this._userAccountService.get(id)
       return decoded; // or user object
     } catch (e) {
